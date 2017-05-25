@@ -1,7 +1,7 @@
 ## Prerequisites
 Java 1.8+
 
-Stanford CoreNLP 3.7.0
+Stanford CoreNLP 3.7.0 ([Download Page](https://stanfordnlp.github.io/CoreNLP/download.html))
 
 ## Installation
 
@@ -9,7 +9,7 @@ Stanford CoreNLP 3.7.0
 
 ## Example
 ### Simple Usage
-```
+```python
 # Simple usage
 nlp = StanfordCoreNLP(r'G:/JavaLibraries/stanford-corenlp-full-2016-10-31/')
 
@@ -22,13 +22,14 @@ print 'Dependency Parsing:', nlp.dependency_parse(sentence)
 ```
 
 ### General Stanford CoreNLP API
-```
+```python
  # General json output
 print nlp.annotate(sentence)
 ```
 
 ### Other Human Languages Support
-```
+Note: you must download addditinal model files and place it in the `.../stanford-corenlp-full-2016-10-31/` folder. For example, you should [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-10-31-models.jar) the `stanford-chinese-corenlp-2016-10-31-models.jar` file if you want to process Chinese.
+```python
 # Other human languages support, e.g. Chinese
 nlp = StanfordCoreNLP(r'G:/JavaLibraries/stanford-corenlp-full-2016-10-31/',
                       lang='zh')
@@ -50,7 +51,7 @@ print nlp.annotate(sentence)
 ```
 
 ### Use an Existing Server
-```
+```python
 # Use an existing server
 nlp = StanfordCoreNLP('http://corenlp.run', port=80)
-``
+```
