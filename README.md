@@ -21,10 +21,33 @@ print 'Constituency Parsing:', nlp.parse(sentence)
 print 'Dependency Parsing:', nlp.dependency_parse(sentence)
 ```
 
-### General Stanford CoreNLP API
+Output format:
 ```python
- # General json output
-print nlp.annotate(sentence)
+# Tokenize
+[u'Guangdong', u'University', u'of', u'Foreign', u'Studies', u'is', u'located', u'in', u'Guangzhou', u'.']
+
+# Part of Speech
+[(u'Guangdong', u'NNP'), (u'University', u'NNP'), (u'of', u'IN'), (u'Foreign', u'NNP'), (u'Studies', u'NNPS'), (u'is', u'VBZ'), (u'located', u'JJ'), (u'in', u'IN'), (u'Guangzhou', u'NNP'), (u'.', u'.')]
+
+# Named Entities:
+ [(u'Guangdong', u'ORGANIZATION'), (u'University', u'ORGANIZATION'), (u'of', u'ORGANIZATION'), (u'Foreign', u'ORGANIZATION'), (u'Studies', u'ORGANIZATION'), (u'is', u'O'), (u'located', u'O'), (u'in', u'O'), (u'Guangzhou', u'LOCATION'), (u'.', u'O')]
+
+# Constituency Parsing
+ (ROOT
+  (S
+    (NP
+      (NP (NNP Guangdong) (NNP University))
+      (PP (IN of)
+        (NP (NNP Foreign) (NNPS Studies))))
+    (VP (VBZ is)
+      (ADJP (JJ located)
+        (PP (IN in)
+          (NP (NNP Guangzhou)))))
+    (. .)))
+
+# Dependency Parsing
+[(u'ROOT', 0, 7), (u'compound', 2, 1), (u'nsubjpass', 7, 2), (u'case', 5, 3), (u'compound', 5, 4), (u'nmod', 2, 5), (u'auxpass', 7, 6), (u'case', 9, 8), (u'nmod', 7, 9), (u'punct', 7, 10)]
+
 ```
 
 ### Other Human Languages Support
@@ -40,15 +63,23 @@ print nlp.pos_tag(sentence)
 print nlp.ner(sentence)
 print nlp.parse(sentence)
 print nlp.dependency_parse(sentence)
+```
 
-print nlp.word_tokenize(sentence)
-print nlp.pos_tag(sentence)
-print nlp.ner(sentence)
-print nlp.parse(sentence)
-print nlp.dependency_parse(sentence)
-
+### General Stanford CoreNLP API
+```python
+ # General json output
 print nlp.annotate(sentence)
 ```
+You can specify properties:
+annotators: `tokenize, ssplit, pos, lemma, ner, parse, depparse, dcoref`([See Detail](https://stanfordnlp.github.io/CoreNLP/annotators.html))
+pinelineLanguage: `en, zh, fr, de, es` (English, Chinese, French, German, Spanish)([See Annotator Support Detail](https://stanfordnlp.github.io/CoreNLP/human-languages.html)) 
+outputFormat: `json, xml, text`
+```python
+text = 'Guangdong University of Foreign Studies is located in Guangzhou. ' \
+       'GDUFS is active in a full range of international cooperation and exchanges in education. '
+print nlp.annotate(text, properties={'annotators': 'tokenize,ssplit,pos','pinelineLanguage':'en','outputFormat':'xml'})
+```
+
 
 ### Use an Existing Server
 ```python

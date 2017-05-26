@@ -1,10 +1,9 @@
 # _*_coding:utf-8_*_
 import json
-import os
 import subprocess
+import sys
 
 import requests
-import sys
 
 
 class StanfordCoreNLP:
