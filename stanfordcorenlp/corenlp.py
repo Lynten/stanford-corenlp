@@ -1,9 +1,14 @@
 # _*_coding:utf-8_*_
 import json
+import os
+import socket
 import subprocess
 import sys
 
 import requests
+import time
+
+import signal
 
 
 class StanfordCoreNLP:
@@ -17,28 +22,38 @@ class StanfordCoreNLP:
         if path_or_host.startswith('http'):
             self.url = path_or_host + ':' + str(port)
             print 'Using an existing server {}'.format(self.url)
-            return
+        else:
+            print 'Initializing native server...'
+            cmd = "java"
+            java_args = "-Xmx{}".format(self.memory)
+            java_class = "edu.stanford.nlp.pipeline.StanfordCoreNLPServer"
+            path = '"{}*"'.format(self.path_or_host)
 
-        print 'Initializing native server...'
-        cmd = "java"
-        java_args = "-Xmx{}".format(self.memory)
-        java_class = "edu.stanford.nlp.pipeline.StanfordCoreNLPServer"
-        path = '{}*'.format(self.path_or_host)
+            args = [cmd, java_args, '-cp', path, java_class, '-port', str(self.port)]
 
-        args = [cmd, java_args, '-cp', path, java_class, '-port', str(self.port)]
+            args = ' '.join(args)
 
-        print ' '.join(args)
+            print args
 
-        try:
-            self.p = subprocess.Popen(args, shell=True)
-        except:
-            print 'Error! Check the command: {}'.format(' '.join(args))
+            if sys.platform.startswith('win'):
+                self.p = subprocess.Popen(args, shell=True)
+            else:
+                self.p = subprocess.Popen(args, shell=True, preexec_fn=os.setsid)
 
-        self.url = 'http://localhost:' + str(self.port)
+            self.url = 'http://localhost:' + str(self.port)
+
+        # Wait until server starts
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        host_name = self.url.split(':')[0]
+        while sock.connect_ex((host_name[7:], self.port)):
+            time.sleep(1)
+        print 'The server is available.'
 
     def __del__(self):
         if sys.platform.startswith('win'):
             subprocess.call(['taskkill', '/F', '/T', '/PID', str(self.p.pid)])
+        else:
+            os.killpg(os.getpgid(self.p.pid), signal.SIGTERM)
 
     def annotate(self, text, properties=None):
         r = requests.post(self.url, params={'properties': str(properties)}, data=text,

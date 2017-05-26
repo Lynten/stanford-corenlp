@@ -12,6 +12,8 @@ print 'Named Entities:', nlp.ner(sentence)
 print 'Constituency Parsing:', nlp.parse(sentence)
 print 'Dependency Parsing:', nlp.dependency_parse(sentence)
 
+exit(0)
+
 # Other human languages support, e.g. Chinese
 nlp = StanfordCoreNLP(r'G:/JavaLibraries/stanford-corenlp-full-2016-10-31/',
                       lang='zh')
