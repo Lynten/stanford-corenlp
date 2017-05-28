@@ -3,7 +3,7 @@
 from stanfordcorenlp import StanfordCoreNLP
 
 # Simple usage
-nlp = StanfordCoreNLP(r'G:/JavaLibraries/stanford-corenlp-full-2016-10-31/', quiet=False)
+nlp = StanfordCoreNLP(r'G:/JavaLibraries/stanford-corenlp-full-2016-10-31/')
 
 sentence = 'Guangdong University of Foreign Studies is located in Guangzhou.'
 print 'Tokenize:', nlp.word_tokenize(sentence)
