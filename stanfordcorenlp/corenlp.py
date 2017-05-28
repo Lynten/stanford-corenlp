@@ -13,12 +13,13 @@ import signal
 
 
 class StanfordCoreNLP:
-    def __init__(self, path_or_host, port=9000, memory='4g', lang='en', timeout=1500):
+    def __init__(self, path_or_host, port=9000, memory='4g', lang='en', timeout=1500, quiet=True):
         self.path_or_host = path_or_host
         self.port = port
         self.memory = memory
         self.lang = lang
         self.timeout = timeout
+        self.quiet = quiet
 
         if path_or_host.startswith('http'):
             self.url = path_or_host + ':' + str(port)
@@ -36,10 +37,16 @@ class StanfordCoreNLP:
 
             print args
 
+            # Silence
+            out_file = None
+            if self.quiet:
+                out_file = subprocess.PIPE
+
             if sys.platform.startswith('win'):
-                self.p = subprocess.Popen(args, shell=True)
+                self.p = subprocess.Popen(args, shell=True, stdout=out_file, stderr=subprocess.STDOUT)
             else:
-                self.p = subprocess.Popen(args, shell=True, preexec_fn=os.setsid)
+                self.p = subprocess.Popen(args, shell=True, preexec_fn=os.setsid, stdout=out_file,
+                                          stderr=subprocess.STDOUT)
 
             self.url = 'http://localhost:' + str(self.port)
 
@@ -47,7 +54,7 @@ class StanfordCoreNLP:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         host_name = urlparse(self.url).hostname
         while sock.connect_ex((host_name, self.port)):
-            print 'waiting until the server is available.'
+            print 'Waiting until the server is available.'
             time.sleep(1)
         print 'The server is available.'
 
