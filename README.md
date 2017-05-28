@@ -1,3 +1,6 @@
+## stanfordcorenlp
+`stanfordcorenlp` is a Python wrapper for [Stanford CoreNLP](https://stanfordnlp.github.io/CoreNLP/). It provides a simple API for text processing tasks such as Tokenization, Part of Speech Tagging, Named Entity Reconigtion, Constituency Parsing, Dependency Parsing, and more.
+
 ## Prerequisites
 Java 1.8+
 
@@ -51,7 +54,7 @@ Output format:
 ```
 
 ### Other Human Languages Support
-Note: you must download addditinal model files and place it in the `.../stanford-corenlp-full-2016-10-31/` folder. For example, you should [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-10-31-models.jar) the `stanford-chinese-corenlp-2016-10-31-models.jar` file if you want to process Chinese.
+Note: you must download addditinal model file and place it in the `.../stanford-corenlp-full-2016-10-31/` folder. For example, you should [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-10-31-models.jar) the `stanford-chinese-corenlp-2016-10-31-models.jar` file if you want to process Chinese.
 ```python
 # Other human languages support, e.g. Chinese
 nlp = StanfordCoreNLP(r'G:/JavaLibraries/stanford-corenlp-full-2016-10-31/',
@@ -71,8 +74,11 @@ print nlp.dependency_parse(sentence)
 print nlp.annotate(sentence)
 ```
 You can specify properties:
+
 annotators: `tokenize, ssplit, pos, lemma, ner, parse, depparse, dcoref`([See Detail](https://stanfordnlp.github.io/CoreNLP/annotators.html))
+
 pinelineLanguage: `en, zh, fr, de, es` (English, Chinese, French, German, Spanish)([See Annotator Support Detail](https://stanfordnlp.github.io/CoreNLP/human-languages.html)) 
+
 outputFormat: `json, xml, text`
 ```python
 text = 'Guangdong University of Foreign Studies is located in Guangzhou. ' \
