@@ -4,6 +4,7 @@ import os
 import socket
 import subprocess
 import sys
+from urlparse import urlparse
 
 import requests
 import time
@@ -44,8 +45,9 @@ class StanfordCoreNLP:
 
         # Wait until server starts
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        host_name = self.url.split(':')[0]
-        while sock.connect_ex((host_name[7:], self.port)):
+        host_name = urlparse(self.url).hostname
+        while sock.connect_ex((host_name, self.port)):
+            print 'waiting until the server is available.'
             time.sleep(1)
         print 'The server is available.'
 
