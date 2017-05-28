@@ -14,6 +14,8 @@ Stanford CoreNLP 3.7.0 ([Download Page](https://stanfordnlp.github.io/CoreNLP/do
 ### Simple Usage
 ```python
 # Simple usage
+from stanfordcorenlp import StanfordCoreNLP
+
 nlp = StanfordCoreNLP(r'G:/JavaLibraries/stanford-corenlp-full-2016-10-31/')
 
 sentence = 'Guangdong University of Foreign Studies is located in Guangzhou.'
