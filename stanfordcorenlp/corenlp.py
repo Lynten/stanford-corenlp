@@ -1,15 +1,15 @@
 # _*_coding:utf-8_*_
 import json
 import os
+import re
+import signal
 import socket
 import subprocess
 import sys
+import time
 from urlparse import urlparse
 
 import requests
-import time
-
-import signal
 
 
 class StanfordCoreNLP:
@@ -21,15 +21,23 @@ class StanfordCoreNLP:
         self.timeout = timeout
         self.quiet = quiet
 
+        # Check args
+        self._check_args()
+
         if path_or_host.startswith('http'):
             self.url = path_or_host + ':' + str(port)
             print 'Using an existing server {}'.format(self.url)
         else:
+
+            if not os.path.isdir(self.path_or_host):
+                raise IOError(str(self.path_or_host) + ' is not a directory.')
+            directory = os.path.normpath(self.path_or_host) + os.sep
+
             print 'Initializing native server...'
             cmd = "java"
             java_args = "-Xmx{}".format(self.memory)
             java_class = "edu.stanford.nlp.pipeline.StanfordCoreNLPServer"
-            path = '"{}*"'.format(self.path_or_host)
+            path = '"{}*"'.format(directory)
 
             args = [cmd, java_args, '-cp', path, java_class, '-port', str(self.port)]
 
@@ -110,3 +118,10 @@ class StanfordCoreNLP:
         r_dict = json.loads(r.text)
 
         return r_dict
+
+    def _check_args(self):
+        if self.lang not in ['en', 'zh', 'ar', 'fr', 'de', 'es']:
+            raise ValueError(
+                'lang=' + self.lang + ' not supported. Use English(en), Chinese(zh), Arabic(ar), French(fr), German(de), Spanish(es).')
+        if not re.match('\dg', self.memory):
+            raise ValueError('memory=' + self.memory + ' not supported. Use 4g, 6g, 8g and etc. ')
