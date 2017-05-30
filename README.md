@@ -77,11 +77,11 @@ print nlp.annotate(sentence)
 ```
 You can specify properties:
 
-annotators: `tokenize, ssplit, pos, lemma, ner, parse, depparse, dcoref`([See Detail](https://stanfordnlp.github.io/CoreNLP/annotators.html))
+- annotators: `tokenize, ssplit, pos, lemma, ner, parse, depparse, dcoref` ([See Detail](https://stanfordnlp.github.io/CoreNLP/annotators.html))
 
-pinelineLanguage: `en, zh, fr, de, es` (English, Chinese, French, German, Spanish)([See Annotator Support Detail](https://stanfordnlp.github.io/CoreNLP/human-languages.html)) 
+- pinelineLanguage: `en, zh, fr, de, es` (English, Chinese, French, German, Spanish) ([See Annotator Support Detail](https://stanfordnlp.github.io/CoreNLP/human-languages.html)) 
 
-outputFormat: `json, xml, text`
+- outputFormat: `json, xml, text`
 ```python
 text = 'Guangdong University of Foreign Studies is located in Guangzhou. ' \
        'GDUFS is active in a full range of international cooperation and exchanges in education. '
