@@ -59,10 +59,11 @@ class StanfordCoreNLP:
         print 'The server is available.'
 
     def __del__(self):
-        if sys.platform.startswith('win'):
-            subprocess.call(['taskkill', '/F', '/T', '/PID', str(self.p.pid)])
-        else:
-            os.killpg(os.getpgid(self.p.pid), signal.SIGTERM)
+        if hasattr(self, 'p'):
+            if sys.platform.startswith('win'):
+                subprocess.call(['taskkill', '/F', '/T', '/PID', str(self.p.pid)])
+            else:
+                os.killpg(os.getpgid(self.p.pid), signal.SIGTERM)
 
     def annotate(self, text, properties=None):
         r = requests.post(self.url, params={'properties': str(properties)}, data=text,
