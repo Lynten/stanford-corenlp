@@ -1,4 +1,7 @@
 ## stanfordcorenlp
+[![PyPI](https://img.shields.io/pypi/v/stanfordcorenlp.svg)]()
+[![GitHub release](https://img.shields.io/github/release/Lynten/stanford-corenlp.svg)]()
+
 `stanfordcorenlp` is a Python wrapper for [Stanford CoreNLP](https://stanfordnlp.github.io/CoreNLP/). It provides a simple API for text processing tasks such as Tokenization, Part of Speech Tagging, Named Entity Reconigtion, Constituency Parsing, Dependency Parsing, and more.
 
 ## Prerequisites
@@ -34,7 +37,7 @@ Output format:
 # Part of Speech
 [(u'Guangdong', u'NNP'), (u'University', u'NNP'), (u'of', u'IN'), (u'Foreign', u'NNP'), (u'Studies', u'NNPS'), (u'is', u'VBZ'), (u'located', u'JJ'), (u'in', u'IN'), (u'Guangzhou', u'NNP'), (u'.', u'.')]
 
-# Named Entities:
+# Named Entities
  [(u'Guangdong', u'ORGANIZATION'), (u'University', u'ORGANIZATION'), (u'of', u'ORGANIZATION'), (u'Foreign', u'ORGANIZATION'), (u'Studies', u'ORGANIZATION'), (u'is', u'O'), (u'located', u'O'), (u'in', u'O'), (u'Guangzhou', u'LOCATION'), (u'.', u'O')]
 
 # Constituency Parsing
@@ -59,8 +62,7 @@ Output format:
 Note: you must download addditinal model file and place it in the `.../stanford-corenlp-full-2016-10-31/` folder. For example, you should [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-10-31-models.jar) the `stanford-chinese-corenlp-2016-10-31-models.jar` file if you want to process Chinese.
 ```python
 # Other human languages support, e.g. Chinese
-nlp = StanfordCoreNLP(r'G:/JavaLibraries/stanford-corenlp-full-2016-10-31/',
-                      lang='zh')
+nlp = StanfordCoreNLP(r'G:/JavaLibraries/stanford-corenlp-full-2016-10-31/', lang='zh')
 
 sentence = '清华大学位于北京。'
 print nlp.word_tokenize(sentence)
@@ -71,19 +73,20 @@ print nlp.dependency_parse(sentence)
 ```
 
 ### General Stanford CoreNLP API
-Since this will load all the models which require more memory, set `nlp = StanfordCoreNLP(r'path_to_corenlp',memory='8g')`.
+Since this will load all the models which require more memory, initialize the server with more memory. 8GB is recommended.
 
 ```python
  # General json output
+nlp = StanfordCoreNLP(r'path_to_corenlp', memory='8g')
 print nlp.annotate(sentence)
 ```
 You can specify properties:
 
-- annotators: `tokenize, ssplit, pos, lemma, ner, parse, depparse, dcoref` ([See Detail](https://stanfordnlp.github.io/CoreNLP/annotators.html))
+- `annotators`: `tokenize, ssplit, pos, lemma, ner, parse, depparse, dcoref` ([See Detail](https://stanfordnlp.github.io/CoreNLP/annotators.html))
 
-- pinelineLanguage: `en, zh, ar, fr, de, es` (English, Chinese, Arabic, French, German, Spanish) ([See Annotator Support Detail](https://stanfordnlp.github.io/CoreNLP/human-languages.html)) 
+- `pinelineLanguage`: `en, zh, ar, fr, de, es` (English, Chinese, Arabic, French, German, Spanish) ([See Annotator Support Detail](https://stanfordnlp.github.io/CoreNLP/human-languages.html)) 
 
-- outputFormat: `json, xml, text`
+- `outputFormat`: `json, xml, text`
 ```python
 text = 'Guangdong University of Foreign Studies is located in Guangzhou. ' \
        'GDUFS is active in a full range of international cooperation and exchanges in education. '
