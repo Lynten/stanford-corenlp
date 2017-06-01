@@ -1,4 +1,5 @@
 # _*_coding:utf-8_*_
+import glob
 import json
 import os
 import re
@@ -29,9 +30,35 @@ class StanfordCoreNLP:
             print 'Using an existing server {}'.format(self.url)
         else:
 
+            # Check Java
+            if not os.system('java -version') == 0:
+                raise RuntimeError('Java not found.')
+
+            # Check if the dir exists
             if not os.path.isdir(self.path_or_host):
                 raise IOError(str(self.path_or_host) + ' is not a directory.')
             directory = os.path.normpath(self.path_or_host) + os.sep
+
+            # Check if the language specific model file exists
+            switcher = {
+                'en': 'stanford-corenlp-[0-9].[0-9].[0-9]-models.jar',
+                'zh': 'stanford-chinese-corenlp-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-models.jar',
+                'ar': 'stanford-arabic-corenlp-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-models.jar',
+                'fr': 'stanford-french-corenlp-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-models.jar',
+                'de': 'stanford-german-corenlp-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-models.jar',
+                'es': 'stanford-spanish-corenlp-[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-models.jar'
+            }
+            jars = {
+                'en': 'stanford-corenlp-x.x.x-models.jar',
+                'zh': 'stanford-chinese-corenlp-yyyy-MM-dd-models.jar',
+                'ar': 'stanford-arabic-corenlp-yyyy-MM-dd-models.jar',
+                'fr': 'stanford-french-corenlp-yyyy-MM-dd-models.jar',
+                'de': 'stanford-german-corenlp-yyyy-MM-dd-models.jar',
+                'es': 'stanford-spanish-corenlp-yyyy-MM-dd-models.jar'
+            }
+            if len(glob.glob(directory + switcher.get(self.lang))) <= 0:
+                raise IOError(jars.get(
+                    self.lang) + ' not exists. You should download and place it in the ' + directory + ' first.')
 
             print 'Initializing native server...'
             cmd = "java"
@@ -67,6 +94,7 @@ class StanfordCoreNLP:
         print 'The server is available.'
 
     def __del__(self):
+        import sys
         if hasattr(self, 'p'):
             if sys.platform.startswith('win'):
                 subprocess.call(['taskkill', '/F', '/T', '/PID', str(self.p.pid)])
