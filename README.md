@@ -71,6 +71,8 @@ print nlp.dependency_parse(sentence)
 ```
 
 ### General Stanford CoreNLP API
+Since this will load all the models which require more memory, set `nlp = StanfordCoreNLP(r'path_to_corenlp',memory='8g')`.
+
 ```python
  # General json output
 print nlp.annotate(sentence)
@@ -79,13 +81,15 @@ You can specify properties:
 
 - annotators: `tokenize, ssplit, pos, lemma, ner, parse, depparse, dcoref` ([See Detail](https://stanfordnlp.github.io/CoreNLP/annotators.html))
 
-- pinelineLanguage: `en, zh, fr, de, es` (English, Chinese, French, German, Spanish) ([See Annotator Support Detail](https://stanfordnlp.github.io/CoreNLP/human-languages.html)) 
+- pinelineLanguage: `en, zh, ar, fr, de, es` (English, Chinese, Arabic, French, German, Spanish) ([See Annotator Support Detail](https://stanfordnlp.github.io/CoreNLP/human-languages.html)) 
 
 - outputFormat: `json, xml, text`
 ```python
 text = 'Guangdong University of Foreign Studies is located in Guangzhou. ' \
        'GDUFS is active in a full range of international cooperation and exchanges in education. '
-print nlp.annotate(text, properties={'annotators': 'tokenize,ssplit,pos','pinelineLanguage':'en','outputFormat':'xml'})
+
+props={'annotators': 'tokenize,ssplit,pos','pinelineLanguage':'en','outputFormat':'xml'}
+print nlp.annotate(text, properties=props)
 ```
 
 
