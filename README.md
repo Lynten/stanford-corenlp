@@ -2,7 +2,7 @@
 `stanfordcorenlp` is a Python wrapper for [Stanford CoreNLP](https://stanfordnlp.github.io/CoreNLP/). It provides a simple API for text processing tasks such as Tokenization, Part of Speech Tagging, Named Entity Reconigtion, Constituency Parsing, Dependency Parsing, and more.
 
 ## Prerequisites
-Java 1.8+
+Java 1.8+ (Check with command: `java -version`) ([Download Page](http://www.oracle.com/technetwork/cn/java/javase/downloads/jdk8-downloads-2133151-zhs.html))
 
 Stanford CoreNLP 3.7.0 ([Download Page](https://stanfordnlp.github.io/CoreNLP/download.html))
 
