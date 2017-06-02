@@ -1,4 +1,6 @@
 # _*_coding:utf-8_*_
+from __future__ import print_function
+
 import glob
 import json
 import os
@@ -8,7 +10,11 @@ import socket
 import subprocess
 import sys
 import time
-from urlparse import urlparse
+
+try:
+    from urlparse import urlparse
+except ImportError:
+    from urllib.parse import urlparse
 
 import requests
 
@@ -27,7 +33,7 @@ class StanfordCoreNLP:
 
         if path_or_host.startswith('http'):
             self.url = path_or_host + ':' + str(port)
-            print 'Using an existing server {}'.format(self.url)
+            print('Using an existing server {}'.format(self.url))
         else:
 
             # Check Java
@@ -60,7 +66,7 @@ class StanfordCoreNLP:
                 raise IOError(jars.get(
                     self.lang) + ' not exists. You should download and place it in the ' + directory + ' first.')
 
-            print 'Initializing native server...'
+            print('Initializing native server...')
             cmd = "java"
             java_args = "-Xmx{}".format(self.memory)
             java_class = "edu.stanford.nlp.pipeline.StanfordCoreNLPServer"
@@ -70,18 +76,19 @@ class StanfordCoreNLP:
 
             args = ' '.join(args)
 
-            print args
+            print(args)
 
             # Silence
-            out_file = None
-            if self.quiet:
-                out_file = subprocess.PIPE
+            with open(os.devnull, 'w') as null_file:
+                out_file = None
+                if self.quiet:
+                    out_file = null_file
 
-            if sys.platform.startswith('win'):
-                self.p = subprocess.Popen(args, shell=True, stdout=out_file, stderr=subprocess.STDOUT)
-            else:
-                self.p = subprocess.Popen(args, shell=True, preexec_fn=os.setsid, stdout=out_file,
-                                          stderr=subprocess.STDOUT)
+                if sys.platform.startswith('win'):
+                    self.p = subprocess.Popen(args, shell=True, stdout=out_file, stderr=subprocess.STDOUT)
+                else:
+                    self.p = subprocess.Popen(args, shell=True, preexec_fn=os.setsid, stdout=out_file,
+                                              stderr=subprocess.STDOUT)
 
             self.url = 'http://localhost:' + str(self.port)
 
@@ -89,12 +96,11 @@ class StanfordCoreNLP:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         host_name = urlparse(self.url).hostname
         while sock.connect_ex((host_name, self.port)):
-            print 'Waiting until the server is available.'
+            print('Waiting until the server is available.')
             time.sleep(1)
-        print 'The server is available.'
+        print('The server is available.')
 
     def __del__(self):
-        import sys
         if hasattr(self, 'p'):
             if sys.platform.startswith('win'):
                 subprocess.call(['taskkill', '/F', '/T', '/PID', str(self.p.pid)])
@@ -102,6 +108,9 @@ class StanfordCoreNLP:
                 os.killpg(os.getpgid(self.p.pid), signal.SIGTERM)
 
     def annotate(self, text, properties=None):
+        if sys.version_info.major >= 3:
+            text = text.encode('utf-8')
+
         r = requests.post(self.url, params={'properties': str(properties)}, data=text,
                           headers={'Connection': 'close'})
         return r.text
@@ -140,6 +149,9 @@ class StanfordCoreNLP:
                 s['basicDependencies']]
 
     def _request(self, annotators=None, data=None):
+        if sys.version_info.major >= 3:
+            data = data.encode('utf-8')
+
         properties = {'annotators': annotators, 'pipelineLanguage': self.lang, 'outputFormat': 'json'}
         r = requests.post(self.url, params={'properties': str(properties)}, data=data,
                           headers={'Connection': 'close'})

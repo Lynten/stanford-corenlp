@@ -61,6 +61,8 @@ Output format:
 ### Other Human Languages Support
 Note: you must download addditinal model file and place it in the `.../stanford-corenlp-full-2016-10-31/` folder. For example, you should [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-10-31-models.jar) the `stanford-chinese-corenlp-2016-10-31-models.jar` file if you want to process Chinese.
 ```python
+# _*_coding:utf-8_*_
+
 # Other human languages support, e.g. Chinese
 nlp = StanfordCoreNLP(r'G:/JavaLibraries/stanford-corenlp-full-2016-10-31/', lang='zh')
 
