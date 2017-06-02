@@ -3,7 +3,7 @@ from setuptools import setup
 setup(
     name='stanfordcorenlp',
     packages=['stanfordcorenlp'],
-    version='3.7.0.1',
+    version='3.7.0.2',
     description='Python wrapper for Stanford CoreNLP.',
 
     author='Lynten Guo',
@@ -12,7 +12,7 @@ setup(
     url='https://github.com/Lynten/stanford-corenlp',
     keywords=['NLP', 'CL', 'natural language processing',
               'computational linguistics'],
-    install_requires=['requests'],
+    install_requires=['psutil', 'requests'],
 
     classifiers=[
         'Development Status :: 5 - Production/Stable',

@@ -3,6 +3,7 @@ from __future__ import print_function
 
 import glob
 import json
+import logging
 import os
 import re
 import signal
@@ -22,24 +23,28 @@ import requests
 
 
 class StanfordCoreNLP:
-    def __init__(self, path_or_host, port=9000, memory='4g', lang='en', timeout=1500, quiet=True):
+    def __init__(self, path_or_host, port=9000, memory='4g', lang='en', timeout=1500, quiet=True,
+                 logging_level=logging.WARNING):
         self.path_or_host = path_or_host
         self.port = port
         self.memory = memory
         self.lang = lang
         self.timeout = timeout
         self.quiet = quiet
+        self.logging_level = logging_level
+
+        logging.basicConfig(level=self.logging_level)
 
         # Check args
         self._check_args()
 
         if path_or_host.startswith('http'):
             self.url = path_or_host + ':' + str(port)
-            print('Using an existing server {}'.format(self.url))
+            logging.info('Using an existing server {}'.format(self.url))
         else:
 
             # Check Java
-            if not os.system('java -version') == 0:
+            if not subprocess.call('java -version', stdout=subprocess.PIPE, stderr=subprocess.STDOUT) == 0:
                 raise RuntimeError('Java not found.')
 
             # Check if the dir exists
@@ -66,9 +71,9 @@ class StanfordCoreNLP:
             }
             if len(glob.glob(directory + switcher.get(self.lang))) <= 0:
                 raise IOError(jars.get(
-                        self.lang) + ' not exists. You should download and place it in the ' + directory + ' first.')
+                    self.lang) + ' not exists. You should download and place it in the ' + directory + ' first.')
 
-            print('Initializing native server...')
+            logging.info('Initializing native server...')
             cmd = "java"
             java_args = "-Xmx{}".format(self.memory)
             java_class = "edu.stanford.nlp.pipeline.StanfordCoreNLPServer"
@@ -78,7 +83,7 @@ class StanfordCoreNLP:
 
             args = ' '.join(args)
 
-            print(args)
+            logging.info(args)
 
             # Silence
             with open(os.devnull, 'w') as null_file:
@@ -87,7 +92,7 @@ class StanfordCoreNLP:
                     out_file = null_file
 
                 self.p = subprocess.Popen(args, shell=True, stdout=out_file, stderr=subprocess.STDOUT)
-                print('Server shell PID: {}'.format(self.p.pid))
+                logging.info('Server shell PID: {}'.format(self.p.pid))
 
             self.url = 'http://localhost:' + str(self.port)
 
@@ -95,25 +100,25 @@ class StanfordCoreNLP:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         host_name = urlparse(self.url).hostname
         while sock.connect_ex((host_name, self.port)):
-            print('Waiting until the server is available.')
+            logging.info('Waiting until the server is available.')
             time.sleep(1)
-        print('The server is available.')
+        logging.info('The server is available.')
 
     def __del__(self):
-        print('Cleanup...')
+        logging.info('Cleanup...')
         if hasattr(self, 'p'):
             try:
                 parent = psutil.Process(self.p.pid)
             except psutil.NoSuchProcess:
-                print('No process: {}'.format(self.p.pid))
+                logging.info('No process: {}'.format(self.p.pid))
                 return
             children = parent.children(recursive=True)
             for process in children:
+                logging.info('Killing pid: {} cmdline: {}'.format(process.pid, process.cmdline()))
                 process.send_signal(signal.SIGTERM)
-                print('Killing pid: {} cmdline: {}'.format(process.pid, process.cmdline()))
 
+            logging.info('Killing shell pid: {}'.format(parent.pid))
             parent.send_signal(signal.SIGTERM)
-            print('Killing shell pid: {}'.format(parent.pid))
 
     def annotate(self, text, properties=None):
         if sys.version_info.major >= 3:
@@ -170,6 +175,6 @@ class StanfordCoreNLP:
     def _check_args(self):
         if self.lang not in ['en', 'zh', 'ar', 'fr', 'de', 'es']:
             raise ValueError(
-                    'lang=' + self.lang + ' not supported. Use English(en), Chinese(zh), Arabic(ar), French(fr), German(de), Spanish(es).')
+                'lang=' + self.lang + ' not supported. Use English(en), Chinese(zh), Arabic(ar), French(fr), German(de), Spanish(es).')
         if not re.match('\dg', self.memory):
             raise ValueError('memory=' + self.memory + ' not supported. Use 4g, 6g, 8g and etc. ')
