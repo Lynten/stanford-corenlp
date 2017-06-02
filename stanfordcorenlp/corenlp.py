@@ -11,6 +11,8 @@ import subprocess
 import sys
 import time
 
+import psutil
+
 try:
     from urlparse import urlparse
 except ImportError:
@@ -64,7 +66,7 @@ class StanfordCoreNLP:
             }
             if len(glob.glob(directory + switcher.get(self.lang))) <= 0:
                 raise IOError(jars.get(
-                    self.lang) + ' not exists. You should download and place it in the ' + directory + ' first.')
+                        self.lang) + ' not exists. You should download and place it in the ' + directory + ' first.')
 
             print('Initializing native server...')
             cmd = "java"
@@ -84,11 +86,8 @@ class StanfordCoreNLP:
                 if self.quiet:
                     out_file = null_file
 
-                if sys.platform.startswith('win'):
-                    self.p = subprocess.Popen(args, shell=True, stdout=out_file, stderr=subprocess.STDOUT)
-                else:
-                    self.p = subprocess.Popen(args, shell=True, preexec_fn=os.setsid, stdout=out_file,
-                                              stderr=subprocess.STDOUT)
+                self.p = subprocess.Popen(args, shell=True, stdout=out_file, stderr=subprocess.STDOUT)
+                print('Server shell PID: {}'.format(self.p.pid))
 
             self.url = 'http://localhost:' + str(self.port)
 
@@ -101,11 +100,20 @@ class StanfordCoreNLP:
         print('The server is available.')
 
     def __del__(self):
+        print('Cleanup...')
         if hasattr(self, 'p'):
-            if sys.platform.startswith('win'):
-                subprocess.call(['taskkill', '/F', '/T', '/PID', str(self.p.pid)])
-            else:
-                os.killpg(os.getpgid(self.p.pid), signal.SIGTERM)
+            try:
+                parent = psutil.Process(self.p.pid)
+            except psutil.NoSuchProcess:
+                print('No process: {}'.format(self.p.pid))
+                return
+            children = parent.children(recursive=True)
+            for process in children:
+                process.send_signal(signal.SIGTERM)
+                print('Killing pid: {} cmdline: {}'.format(process.pid, process.cmdline()))
+
+            parent.send_signal(signal.SIGTERM)
+            print('Killing shell pid: {}'.format(parent.pid))
 
     def annotate(self, text, properties=None):
         if sys.version_info.major >= 3:
@@ -162,6 +170,6 @@ class StanfordCoreNLP:
     def _check_args(self):
         if self.lang not in ['en', 'zh', 'ar', 'fr', 'de', 'es']:
             raise ValueError(
-                'lang=' + self.lang + ' not supported. Use English(en), Chinese(zh), Arabic(ar), French(fr), German(de), Spanish(es).')
+                    'lang=' + self.lang + ' not supported. Use English(en), Chinese(zh), Arabic(ar), French(fr), German(de), Spanish(es).')
         if not re.match('\dg', self.memory):
             raise ValueError('memory=' + self.memory + ' not supported. Use 4g, 6g, 8g and etc. ')
