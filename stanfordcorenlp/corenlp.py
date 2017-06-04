@@ -44,7 +44,7 @@ class StanfordCoreNLP:
         else:
 
             # Check Java
-            if not subprocess.call('java -version', stdout=subprocess.PIPE, stderr=subprocess.STDOUT) == 0:
+            if not subprocess.call(['java', '-version'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT) == 0:
                 raise RuntimeError('Java not found.')
 
             # Check if the dir exists
