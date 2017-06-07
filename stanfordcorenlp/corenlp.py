@@ -140,7 +140,7 @@ class StanfordCoreNLP:
             for token in s['tokens']:
                 words.append(token['word'])
                 tags.append(token['pos'])
-        return zip(words, tags)
+        return list(zip(words, tags))
 
     def ner(self, sentence):
         r_dict = self._request('ner', sentence)
@@ -150,7 +150,7 @@ class StanfordCoreNLP:
             for token in s['tokens']:
                 words.append(token['word'])
                 ner_tags.append(token['ner'])
-        return zip(words, ner_tags)
+        return list(zip(words, ner_tags))
 
     def parse(self, sentence):
         r_dict = self._request('pos,parse', sentence)
