@@ -73,6 +73,11 @@ class StanfordCoreNLP:
                 raise IOError(jars.get(
                     self.lang) + ' not exists. You should download and place it in the ' + directory + ' first.')
 
+            # Check if the port is in use
+            if self.port in [conn.laddr[1] for conn in psutil.net_connections()]:
+                raise IOError('Port ' + str(self.port) + ' is already in use.')
+
+            # Start native server
             logging.info('Initializing native server...')
             cmd = "java"
             java_args = "-Xmx{}".format(self.memory)
