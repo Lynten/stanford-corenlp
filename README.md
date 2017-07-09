@@ -103,3 +103,15 @@ print nlp.annotate(text, properties=props)
 # Use an existing server
 nlp = StanfordCoreNLP('http://corenlp.run', port=80)
 ```
+
+## Debug
+```python
+import logging
+from stanfordcorenlp import StanfordCoreNLP
+
+# Debug the wrapper
+nlp = StanfordCoreNLP(r'path_or_host', logging_level=logging.DEBUG)
+
+# Check more info from the CoreNLP Server 
+nlp = StanfordCoreNLP(r'path_or_host', quiet=False, logging_level=logging.DEBUG)
+```
