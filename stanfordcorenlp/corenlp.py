@@ -23,7 +23,7 @@ import requests
 
 
 class StanfordCoreNLP:
-    def __init__(self, path_or_host, port=9000, memory='4g', lang='en', timeout=1500, quiet=True,
+    def __init__(self, path_or_host, port=8000, memory='4g', lang='en', timeout=1500, quiet=True,
                  logging_level=logging.WARNING):
         self.path_or_host = path_or_host
         self.port = port
@@ -183,3 +183,13 @@ class StanfordCoreNLP:
                 'lang=' + self.lang + ' not supported. Use English(en), Chinese(zh), Arabic(ar), French(fr), German(de), Spanish(es).')
         if not re.match('\dg', self.memory):
             raise ValueError('memory=' + self.memory + ' not supported. Use 4g, 6g, 8g and etc. ')
+
+    def dcorf(self,sentence):
+        text=[]
+        cluster_no=[]
+        position=[]
+        r_dict=self._request('dcoref',sentence)
+        for key,value in r_dict['corefs'].items():
+            for i in range(len(value)):
+                position.append(value[i]['position']),cluster_no.append(key),text.append(value[i]['text'])
+        return position,cluster_no,text
