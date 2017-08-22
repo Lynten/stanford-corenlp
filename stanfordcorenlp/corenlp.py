@@ -104,6 +104,7 @@ class StanfordCoreNLP:
         # Wait until server starts
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         host_name = urlparse(self.url).hostname
+        time.sleep(1)
         while sock.connect_ex((host_name, self.port)):
             logging.info('Waiting until the server is available.')
             time.sleep(1)
