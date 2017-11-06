@@ -115,3 +115,12 @@ nlp = StanfordCoreNLP(r'path_or_host', logging_level=logging.DEBUG)
 # Check more info from the CoreNLP Server 
 nlp = StanfordCoreNLP(r'path_or_host', quiet=False, logging_level=logging.DEBUG)
 ```
+
+## Build
+
+We use `setuptools` to package our project.
+```
+$ python setup.py bdist_wheel --universal
+```
+
+You will see the `.whl` file under `dist` directory.
