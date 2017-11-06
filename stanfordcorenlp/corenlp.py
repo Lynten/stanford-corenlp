@@ -135,21 +135,12 @@ class StanfordCoreNLP:
 
     def word_tokenize(self, sentence, span=False):
         r_dict = self._request('ssplit,tokenize', sentence)
-        tokens = [token['word'] for s in r_dict['sentences'] for token in s['tokens']]
+        tokens = [token['originalText'] for s in r_dict['sentences'] for token in s['tokens']]
 
         # Whether return token span
         if span:
-            if sys.version_info.major <= 2 and type(sentence) == str:
-                sentence = sentence.decode('utf-8')
-
-            spans = []
-            begin = 0
-            for token in tokens:
-                span_from = sentence.index(token, begin)
-                span_to = span_from + len(token)
-                spans.append((span_from, span_to))
-                begin = span_to
-
+            spans = [(token['characterOffsetBegin'], token['characterOffsetEnd']) for s in r_dict['sentences'] for token
+                     in s['tokens']]
             return tokens, spans
         else:
             return tokens
