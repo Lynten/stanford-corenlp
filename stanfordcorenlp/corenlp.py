@@ -133,9 +133,26 @@ class StanfordCoreNLP:
                           headers={'Connection': 'close'})
         return r.text
 
-    def word_tokenize(self, sentence):
+    def word_tokenize(self, sentence, span=False):
         r_dict = self._request('ssplit,tokenize', sentence)
-        return [token['word'] for s in r_dict['sentences'] for token in s['tokens']]
+        tokens = [token['word'] for s in r_dict['sentences'] for token in s['tokens']]
+
+        # Whether return token span
+        if span:
+            if sys.version_info.major <= 2 and type(sentence) == str:
+                sentence = sentence.decode('utf-8')
+
+            spans = []
+            begin = 0
+            for token in tokens:
+                span_from = sentence.index(token, begin)
+                span_to = span_from + len(token)
+                spans.append((span_from, span_to))
+                begin = span_to
+
+            return tokens, spans
+        else:
+            return tokens
 
     def pos_tag(self, sentence):
         r_dict = self._request('pos', sentence)
