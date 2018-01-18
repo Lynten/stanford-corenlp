@@ -16,6 +16,7 @@ print('Part of Speech:', nlp.pos_tag(sentence))
 print('Named Entities:', nlp.ner(sentence))
 print('Constituency Parsing:', nlp.parse(sentence))
 print('Dependency Parsing:', nlp.dependency_parse(sentence))
+position,cluster_no,text=nlp.dcorf(sentence)
 
 nlp.__del__()
 # Other human languages support, e.g. Chinese
