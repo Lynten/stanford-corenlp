@@ -133,6 +133,12 @@ class StanfordCoreNLP:
                           headers={'Connection': 'close'})
         return r.text
 
+    def tregex_request(self, text, pattern):
+        tregex_url = self.url + '/tregex'
+        request = {"pattern": pattern}
+        answ_to_req = requests.post(tregex_url, data=text, params=request).json()['sentences']
+        return answ_to_req
+
     def word_tokenize(self, sentence, span=False):
         r_dict = self._request('ssplit,tokenize', sentence)
         tokens = [token['originalText'] for s in r_dict['sentences'] for token in s['tokens']]
