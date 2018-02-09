@@ -133,6 +133,21 @@ class StanfordCoreNLP:
                           headers={'Connection': 'close'})
         return r.text
 
+    def tregex(self, sentence, pattern):
+        tregex_url = self.url + '/tregex'
+        r_dict = self._request(tregex_url, pattern, "tokenize,ssplit,depparse,parse", sentence)
+        return r_dict
+
+    def tokensregex(self, sentence, pattern):
+        tokensregex_url = self.url + '/tokensregex'
+        r_dict = self._request(tokensregex_url, pattern, "tokenize,ssplit,depparse", sentence)
+        return r_dict
+
+    def semgrex(self, sentence, pattern):
+        semgrex_url = self.url + '/semgrex'
+        r_dict = self._request(semgrex_url, pattern, "tokenize,ssplit,depparse", sentence)
+        return r_dict
+
     def word_tokenize(self, sentence, span=False):
         r_dict = self._request('ssplit,tokenize', sentence)
         tokens = [token['originalText'] for s in r_dict['sentences'] for token in s['tokens']]
@@ -174,10 +189,15 @@ class StanfordCoreNLP:
         return [(dep['dep'], dep['governor'], dep['dependent']) for s in r_dict['sentences'] for dep in
                 s['basicDependencies']]
 
+    def switch_language(self, language="en"):
+        self._check_language(language)
+        self.lang = language
+
     def _request(self, annotators=None, data=None):
         if sys.version_info.major >= 3:
             data = data.encode('utf-8')
 
+        print("2", self.lang)
         properties = {'annotators': annotators, 'pipelineLanguage': self.lang, 'outputFormat': 'json'}
         r = requests.post(self.url, params={'properties': str(properties)}, data=data,
                           headers={'Connection': 'close'})
@@ -185,9 +205,26 @@ class StanfordCoreNLP:
 
         return r_dict
 
+    def _request(self, url, pattern, annotators=None, data=None):
+        if sys.version_info.major >= 3:
+            data = data.encode('utf-8')
+
+        print("1", self.lang)
+        properties = {'annotators': annotators, 'pipelineLanguage': self.lang, 'outputFormat': 'json'}
+        param = {"pattern": pattern, "properties": str(properties)}
+
+        r = requests.post(url, params=param, data=data, headers={'Connection': 'close'})
+        r_dict = json.loads(r.text)
+
+        return r_dict
+
     def _check_args(self):
-        if self.lang not in ['en', 'zh', 'ar', 'fr', 'de', 'es']:
-            raise ValueError(
-                'lang=' + self.lang + ' not supported. Use English(en), Chinese(zh), Arabic(ar), French(fr), German(de), Spanish(es).')
+        self._check_language(self.lang)
         if not re.match('\dg', self.memory):
             raise ValueError('memory=' + self.memory + ' not supported. Use 4g, 6g, 8g and etc. ')
+
+    def _check_language(self, lang):
+        if lang not in ['en', 'zh', 'ar', 'fr', 'de', 'es']:
+            raise ValueError(
+                'lang=' + self.lang + ' not supported. Use English(en), Chinese(zh), Arabic(ar), French(fr), German(de), Spanish(es).')
+
