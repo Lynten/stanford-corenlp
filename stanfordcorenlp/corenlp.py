@@ -6,7 +6,6 @@ import json
 import logging
 import os
 import re
-import signal
 import socket
 import subprocess
 import sys
@@ -23,7 +22,7 @@ import requests
 
 
 class StanfordCoreNLP:
-    def __init__(self, path_or_host, port=9000, memory='4g', lang='en', timeout=1500, quiet=True,
+    def __init__(self, path_or_host, port=None, memory='4g', lang='en', timeout=1500, quiet=True,
                  logging_level=logging.WARNING):
         self.path_or_host = path_or_host
         self.port = port
@@ -51,6 +50,7 @@ class StanfordCoreNLP:
             if not os.path.isdir(self.path_or_host):
                 raise IOError(str(self.path_or_host) + ' is not a directory.')
             directory = os.path.normpath(self.path_or_host) + os.sep
+            self.class_path_dir = directory
 
             # Check if the language specific model file exists
             switcher = {
@@ -73,6 +73,13 @@ class StanfordCoreNLP:
                 raise IOError(jars.get(
                     self.lang) + ' not exists. You should download and place it in the ' + directory + ' first.')
 
+            # If port not set, auto select
+            if self.port is None:
+                for port_candidate in range(9000, 65535):
+                    if port_candidate not in [conn.laddr[1] for conn in psutil.net_connections()]:
+                        self.port = port_candidate
+                        break
+
             # Check if the port is in use
             if self.port in [conn.laddr[1] for conn in psutil.net_connections()]:
                 raise IOError('Port ' + str(self.port) + ' is already in use.')
@@ -82,9 +89,9 @@ class StanfordCoreNLP:
             cmd = "java"
             java_args = "-Xmx{}".format(self.memory)
             java_class = "edu.stanford.nlp.pipeline.StanfordCoreNLPServer"
-            path = '"{}*"'.format(directory)
+            class_path = '"{}*"'.format(directory)
 
-            args = [cmd, java_args, '-cp', path, java_class, '-port', str(self.port)]
+            args = [cmd, java_args, '-cp', class_path, java_class, '-port', str(self.port)]
 
             args = ' '.join(args)
 
@@ -104,12 +111,19 @@ class StanfordCoreNLP:
         # Wait until server starts
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         host_name = urlparse(self.url).hostname
+        time.sleep(1)  # OSX, not tested
         while sock.connect_ex((host_name, self.port)):
             logging.info('Waiting until the server is available.')
             time.sleep(1)
         logging.info('The server is available.')
 
-    def __del__(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
+    def close(self):
         logging.info('Cleanup...')
         if hasattr(self, 'p'):
             try:
@@ -117,13 +131,20 @@ class StanfordCoreNLP:
             except psutil.NoSuchProcess:
                 logging.info('No process: {}'.format(self.p.pid))
                 return
+
+            if self.class_path_dir not in ' '.join(parent.cmdline()):
+                logging.info('Process not in: {}'.format(parent.cmdline()))
+                return
+
             children = parent.children(recursive=True)
             for process in children:
-                logging.info('Killing pid: {} cmdline: {}'.format(process.pid, process.cmdline()))
-                process.send_signal(signal.SIGTERM)
+                logging.info('Killing pid: {}, cmdline: {}'.format(process.pid, process.cmdline()))
+                # process.send_signal(signal.SIGTERM)
+                process.kill()
 
-            logging.info('Killing shell pid: {}'.format(parent.pid))
-            parent.send_signal(signal.SIGTERM)
+            logging.info('Killing shell pid: {}, cmdline: {}'.format(parent.pid, parent.cmdline()))
+            # parent.send_signal(signal.SIGTERM)
+            parent.kill()
 
     def annotate(self, text, properties=None):
         if sys.version_info.major >= 3:
@@ -150,7 +171,7 @@ class StanfordCoreNLP:
 
     def word_tokenize(self, sentence, span=False):
         r_dict = self._request('ssplit,tokenize', sentence)
-        tokens = [token['originalText'] for s in r_dict['sentences'] for token in s['tokens']]
+        tokens = [token['word'] for s in r_dict['sentences'] for token in s['tokens']]
 
         # Whether return token span
         if span:
@@ -193,27 +214,16 @@ class StanfordCoreNLP:
         self._check_language(language)
         self.lang = language
 
-    def _request(self, annotators=None, data=None):
+    def _request(self, annotators=None, data=None, *args, **kwargs):
         if sys.version_info.major >= 3:
             data = data.encode('utf-8')
 
-        print("2", self.lang)
         properties = {'annotators': annotators, 'pipelineLanguage': self.lang, 'outputFormat': 'json'}
-        r = requests.post(self.url, params={'properties': str(properties)}, data=data,
-                          headers={'Connection': 'close'})
-        r_dict = json.loads(r.text)
+        params = {'properties': str(properties)}
+        if 'pattern' in kwargs:
+            params = {"pattern": kwargs['pattern'], "properties": str(properties)}
 
-        return r_dict
-
-    def _request(self, url, pattern, annotators=None, data=None):
-        if sys.version_info.major >= 3:
-            data = data.encode('utf-8')
-
-        print("1", self.lang)
-        properties = {'annotators': annotators, 'pipelineLanguage': self.lang, 'outputFormat': 'json'}
-        param = {"pattern": pattern, "properties": str(properties)}
-
-        r = requests.post(url, params=param, data=data, headers={'Connection': 'close'})
+        r = requests.post(self.url, params=params, data=data, headers={'Connection': 'close'})
         r_dict = json.loads(r.text)
 
         return r_dict
@@ -225,6 +235,5 @@ class StanfordCoreNLP:
 
     def _check_language(self, lang):
         if lang not in ['en', 'zh', 'ar', 'fr', 'de', 'es']:
-            raise ValueError(
-                'lang=' + self.lang + ' not supported. Use English(en), Chinese(zh), Arabic(ar), French(fr), German(de), Spanish(es).')
-
+            raise ValueError('lang=' + self.lang + ' not supported. Use English(en), Chinese(zh), Arabic(ar), '
+                                                   'French(fr), German(de), Spanish(es).')
