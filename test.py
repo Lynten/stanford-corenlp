@@ -6,14 +6,15 @@ import logging
 
 from stanfordcorenlp import StanfordCoreNLP
 
-local_corenlp_path = r'G:/JavaLibraries/stanford-corenlp-full-2016-10-31/'
+# local_corenlp_path = r'G:/JavaLibraries/stanford-corenlp-full-2016-10-31/'
 # local_corenlp_path = r'G:\JavaLibraries\stanford-corenlp-full-2017-06-09'
+local_corenlp_path = r'G:\JavaLibraries\stanford-corenlp-full-2018-01-31'
 # local_corenlp_path = r'/home/gld/JavaLibs/stanford-corenlp-full-2016-10-31'
 
 # Simple usage
-nlp = StanfordCoreNLP(local_corenlp_path, quiet=False, logging_level=logging.INFO)
+nlp = StanfordCoreNLP(local_corenlp_path, quiet=False, logging_level=logging.DEBUG)
 
-sentence = 'Guangdong University of Foreign Studies is located in Guangzhou.'
+sentence = 'Guangdong University of Foreign Studies (GDUFS) is located in Guangzhou.'
 print('Tokenize:', nlp.word_tokenize(sentence))
 print('Part of Speech:', nlp.pos_tag(sentence))
 print('Named Entities:', nlp.ner(sentence))
@@ -23,7 +24,7 @@ print('Dependency Parsing:', nlp.dependency_parse(sentence))
 nlp.close()
 
 # Other human languages support, e.g. Chinese
-nlp = StanfordCoreNLP(local_corenlp_path, lang='zh')
+nlp = StanfordCoreNLP(local_corenlp_path, lang='zh', quiet=False)
 
 sentence = '清华大学位于北京。'
 print(nlp.word_tokenize(sentence))

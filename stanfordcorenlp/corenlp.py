@@ -218,11 +218,12 @@ class StanfordCoreNLP:
         if sys.version_info.major >= 3:
             data = data.encode('utf-8')
 
-        properties = {'annotators': annotators, 'pipelineLanguage': self.lang, 'outputFormat': 'json'}
-        params = {'properties': str(properties)}
+        properties = {'annotators': annotators, 'outputFormat': 'json'}
+        params = {'properties': str(properties), 'pipelineLanguage': self.lang}
         if 'pattern' in kwargs:
-            params = {"pattern": kwargs['pattern'], "properties": str(properties)}
+            params = {"pattern": kwargs['pattern'], 'properties': str(properties), 'pipelineLanguage': self.lang}
 
+        logging.info(params)
         r = requests.post(self.url, params=params, data=data, headers={'Connection': 'close'})
         r_dict = json.loads(r.text)
 
