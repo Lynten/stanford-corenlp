@@ -24,16 +24,14 @@ print('Dependency Parsing:', nlp.dependency_parse(sentence))
 nlp.close()
 
 # Other human languages support, e.g. Chinese
-nlp = StanfordCoreNLP(local_corenlp_path, lang='zh', quiet=False)
-
 sentence = '清华大学位于北京。'
-print(nlp.word_tokenize(sentence))
-print(nlp.pos_tag(sentence))
-print(nlp.ner(sentence))
-print(nlp.parse(sentence))
-print(nlp.dependency_parse(sentence))
 
-nlp.close()
+with StanfordCoreNLP(local_corenlp_path, lang='zh', quiet=False) as nlp:
+    print(nlp.word_tokenize(sentence))
+    print(nlp.pos_tag(sentence))
+    print(nlp.ner(sentence))
+    print(nlp.parse(sentence))
+    print(nlp.dependency_parse(sentence))
 
 # General Stanford CoreNLP API
 nlp = StanfordCoreNLP(local_corenlp_path, memory='8g', lang='zh')

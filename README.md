@@ -31,6 +31,8 @@ print 'Part of Speech:', nlp.pos_tag(sentence)
 print 'Named Entities:', nlp.ner(sentence)
 print 'Constituency Parsing:', nlp.parse(sentence)
 print 'Dependency Parsing:', nlp.dependency_parse(sentence)
+
+nlp.close() # Do not forget to close! The backend server will consume a lot memery.
 ```
 
 Output format:
@@ -68,14 +70,14 @@ Note: you must download an additional model file and place it in the `.../stanfo
 # _*_coding:utf-8_*_
 
 # Other human languages support, e.g. Chinese
-nlp = StanfordCoreNLP(r'G:\JavaLibraries\stanford-corenlp-full-2017-06-09', lang='zh')
-
 sentence = '清华大学位于北京。'
-print nlp.word_tokenize(sentence)
-print nlp.pos_tag(sentence)
-print nlp.ner(sentence)
-print nlp.parse(sentence)
-print nlp.dependency_parse(sentence)
+
+with StanfordCoreNLP(r'G:\JavaLibraries\stanford-corenlp-full-2017-06-09', lang='zh') as nlp:
+    print(nlp.word_tokenize(sentence))
+    print(nlp.pos_tag(sentence))
+    print(nlp.ner(sentence))
+    print(nlp.parse(sentence))
+    print(nlp.dependency_parse(sentence))
 ```
 
 ### General Stanford CoreNLP API
@@ -85,6 +87,7 @@ Since this will load all the models which require more memory, initialize the se
  # General json output
 nlp = StanfordCoreNLP(r'path_to_corenlp', memory='8g')
 print nlp.annotate(sentence)
+nlp.close()
 ```
 You can specify properties:
 
@@ -99,6 +102,7 @@ text = 'Guangdong University of Foreign Studies is located in Guangzhou. ' \
 
 props={'annotators': 'tokenize,ssplit,pos','pipelineLanguage':'en','outputFormat':'xml'}
 print nlp.annotate(text, properties=props)
+nlp.close()
 ```
 
 
@@ -118,6 +122,7 @@ nlp = StanfordCoreNLP(r'path_or_host', logging_level=logging.DEBUG)
 
 # Check more info from the CoreNLP Server 
 nlp = StanfordCoreNLP(r'path_or_host', quiet=False, logging_level=logging.DEBUG)
+nlp.close()
 ```
 
 ## Build
