@@ -7,7 +7,11 @@
 ## Prerequisites
 Java 1.8+ (Check with command: `java -version`) ([Download Page](http://www.oracle.com/technetwork/cn/java/javase/downloads/jdk8-downloads-2133151-zhs.html))
 
-Stanford CoreNLP 3.7.0 ([Download Page](https://stanfordnlp.github.io/CoreNLP/history.html))
+Stanford CoreNLP ([Download Page](https://stanfordnlp.github.io/CoreNLP/history.html))
+
+v3.7.0.2 -> CoreNLP 3.7.0
+
+v3.8.0.1 -> CoreNLP 3.8.0
 
 ## Installation
 
@@ -19,7 +23,7 @@ Stanford CoreNLP 3.7.0 ([Download Page](https://stanfordnlp.github.io/CoreNLP/hi
 # Simple usage
 from stanfordcorenlp import StanfordCoreNLP
 
-nlp = StanfordCoreNLP(r'G:/JavaLibraries/stanford-corenlp-full-2016-10-31/')
+nlp = StanfordCoreNLP(r'G:\JavaLibraries\stanford-corenlp-full-2017-06-09')
 
 sentence = 'Guangdong University of Foreign Studies is located in Guangzhou.'
 print 'Tokenize:', nlp.word_tokenize(sentence)
@@ -59,12 +63,12 @@ Output format:
 ```
 
 ### Other Human Languages Support
-Note: you must download an additional model file and place it in the `.../stanford-corenlp-full-2016-10-31/` folder. For example, you should [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-10-31-models.jar) the `stanford-chinese-corenlp-2016-10-31-models.jar` file if you want to process Chinese.
+Note: you must download an additional model file and place it in the `.../stanford-corenlp-full-2017-06-09` folder. For example, you should [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2017-06-09-models.jar) the `stanford-chinese-corenlp-2017-06-09-models.jar` file if you want to process Chinese.
 ```python
 # _*_coding:utf-8_*_
 
 # Other human languages support, e.g. Chinese
-nlp = StanfordCoreNLP(r'G:/JavaLibraries/stanford-corenlp-full-2016-10-31/', lang='zh')
+nlp = StanfordCoreNLP(r'G:\JavaLibraries\stanford-corenlp-full-2017-06-09', lang='zh')
 
 sentence = '清华大学位于北京。'
 print nlp.word_tokenize(sentence)
@@ -118,7 +122,7 @@ nlp = StanfordCoreNLP(r'path_or_host', quiet=False, logging_level=logging.DEBUG)
 
 ## Build
 
-We use `setuptools` to package our project.
+We use `setuptools` to package our project. You can build from the latest source code with the following command:
 ```
 $ python setup.py bdist_wheel --universal
 ```
