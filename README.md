@@ -107,9 +107,14 @@ nlp.close()
 
 
 ### Use an Existing Server
+Start a [CoreNLP Server](https://stanfordnlp.github.io/CoreNLP/corenlp-server.html) with command:
+```
+java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 15000
+```
+And then:
 ```python
 # Use an existing server
-nlp = StanfordCoreNLP('http://corenlp.run', port=80)
+nlp = StanfordCoreNLP('http://localhost', port=9000)
 ```
 
 ## Debug
