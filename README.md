@@ -1,6 +1,8 @@
 ## stanfordcorenlp
 [![PyPI](https://img.shields.io/pypi/v/stanfordcorenlp.svg)]()
 [![GitHub release](https://img.shields.io/github/release/Lynten/stanford-corenlp.svg)]()
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/stanfordcorenlp.svg)]()
+
 
 `stanfordcorenlp` is a Python wrapper for [Stanford CoreNLP](https://stanfordnlp.github.io/CoreNLP/). It provides a simple API for text processing tasks such as Tokenization, Part of Speech Tagging, Named Entity Reconigtion, Constituency Parsing, Dependency Parsing, and more.
 
@@ -9,9 +11,11 @@ Java 1.8+ (Check with command: `java -version`) ([Download Page](http://www.orac
 
 Stanford CoreNLP ([Download Page](https://stanfordnlp.github.io/CoreNLP/history.html))
 
-v3.7.0.2 -> CoreNLP 3.7.0
-
-v3.8.0.1 -> CoreNLP 3.8.0
+| Py Version | CoreNLP Version |
+| --- | --- |
+|v3.7.0.1 v3.7.0.2 | CoreNLP 3.7.0 |
+|v3.8.0.1 | CoreNLP 3.8.0 |
+|v3.9.1.1 | CoreNLP 3.9.1 |
 
 ## Installation
 
@@ -23,7 +27,7 @@ v3.8.0.1 -> CoreNLP 3.8.0
 # Simple usage
 from stanfordcorenlp import StanfordCoreNLP
 
-nlp = StanfordCoreNLP(r'G:\JavaLibraries\stanford-corenlp-full-2017-06-09')
+nlp = StanfordCoreNLP(r'G:\JavaLibraries\stanford-corenlp-full-2018-02-27')
 
 sentence = 'Guangdong University of Foreign Studies is located in Guangzhou.'
 print 'Tokenize:', nlp.word_tokenize(sentence)
@@ -65,14 +69,14 @@ Output format:
 ```
 
 ### Other Human Languages Support
-Note: you must download an additional model file and place it in the `.../stanford-corenlp-full-2017-06-09` folder. For example, you should [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2017-06-09-models.jar) the `stanford-chinese-corenlp-2017-06-09-models.jar` file if you want to process Chinese.
+Note: you must download an additional model file and place it in the `.../stanford-corenlp-full-2018-02-27` folder. For example, you should download the `stanford-chinese-corenlp-2018-02-27-models.jar` file if you want to process Chinese.
 ```python
 # _*_coding:utf-8_*_
 
 # Other human languages support, e.g. Chinese
 sentence = '清华大学位于北京。'
 
-with StanfordCoreNLP(r'G:\JavaLibraries\stanford-corenlp-full-2017-06-09', lang='zh') as nlp:
+with StanfordCoreNLP(r'G:\JavaLibraries\stanford-corenlp-full-2018-02-27', lang='zh') as nlp:
     print(nlp.word_tokenize(sentence))
     print(nlp.pos_tag(sentence))
     print(nlp.ner(sentence))
