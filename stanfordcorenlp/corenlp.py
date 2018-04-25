@@ -171,7 +171,7 @@ class StanfordCoreNLP:
 
     def word_tokenize(self, sentence, span=False):
         r_dict = self._request('ssplit,tokenize', sentence)
-        tokens = [token['word'] for s in r_dict['sentences'] for token in s['tokens']]
+        tokens = [token['originalText'] for s in r_dict['sentences'] for token in s['tokens']]
 
         # Whether return token span
         if span:
@@ -187,7 +187,7 @@ class StanfordCoreNLP:
         tags = []
         for s in r_dict['sentences']:
             for token in s['tokens']:
-                words.append(token['word'])
+                words.append(token['originalText'])
                 tags.append(token['pos'])
         return list(zip(words, tags))
 
@@ -197,7 +197,7 @@ class StanfordCoreNLP:
         ner_tags = []
         for s in r_dict['sentences']:
             for token in s['tokens']:
-                words.append(token['word'])
+                words.append(token['originalText'])
                 ner_tags.append(token['ner'])
         return list(zip(words, ner_tags))
 
