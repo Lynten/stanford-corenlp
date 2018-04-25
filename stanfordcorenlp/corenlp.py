@@ -210,6 +210,17 @@ class StanfordCoreNLP:
         return [(dep['dep'], dep['governor'], dep['dependent']) for s in r_dict['sentences'] for dep in
                 s['basicDependencies']]
 
+    def coref(self, text):
+        r_dict = self._request('coref', text)
+
+        corefs = []
+        for k, mentions in r_dict['corefs'].items():
+            simplified_mentions = []
+            for m in mentions:
+                simplified_mentions.append((m['sentNum'], m['startIndex'], m['endIndex'], m['text']))
+            corefs.append(simplified_mentions)
+        return corefs
+
     def switch_language(self, language="en"):
         self._check_language(language)
         self.lang = language
