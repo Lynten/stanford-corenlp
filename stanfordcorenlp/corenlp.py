@@ -23,7 +23,7 @@ import requests
 
 class StanfordCoreNLP:
     def __init__(self, path_or_host, port=None, memory='4g', lang='en', timeout=1500, quiet=True,
-                 logging_level=logging.WARNING):
+                 logging_level=logging.WARNING, max_retries=5):
         self.path_or_host = path_or_host
         self.port = port
         self.memory = memory
@@ -112,8 +112,12 @@ class StanfordCoreNLP:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         host_name = urlparse(self.url).hostname
         time.sleep(1)  # OSX, not tested
+        trial = 1
         while sock.connect_ex((host_name, self.port)):
+            if trial > max_retries:
+                raise ValueError('Corenlp server is not available')
             logging.info('Waiting until the server is available.')
+            trial += 1
             time.sleep(1)
         logging.info('The server is available.')
 
