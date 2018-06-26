@@ -181,6 +181,17 @@ class StanfordCoreNLP:
         else:
             return tokens
 
+    def lemma(self, sentence):
+        r_dict = self._request('lemma', sentence)
+        words = []
+        tags = []
+        for s in r_dict['sentences']:
+            for token in s['tokens']:
+                words.append(token['originalText'])
+                tags.append(token['lemma'])
+        return list(zip(words, tags))
+
+
     def pos_tag(self, sentence):
         r_dict = self._request('pos', sentence)
         words = []
