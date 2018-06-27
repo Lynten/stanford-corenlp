@@ -251,5 +251,5 @@ class StanfordCoreNLP(object):
 
     def _check_language(self, lang):
         if lang not in ['en', 'zh', 'ar', 'fr', 'de', 'es']:
-            raise ValueError('lang=' + self.lang + ' not supported. Use English(en), Chinese(zh), Arabic(ar), '
+            raise ValueError('lang=' + lang + ' not supported. Use English(en), Chinese(zh), Arabic(ar), '
                                                    'French(fr), German(de), Spanish(es).')
