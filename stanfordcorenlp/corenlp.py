@@ -235,7 +235,7 @@ class StanfordCoreNLP:
             params = {"pattern": kwargs['pattern'], 'properties': str(properties), 'pipelineLanguage': self.lang}
 
         logging.info(params)
-        r = requests.post(self.url, params=params, data=data, headers={'Connection': 'close'})
+        r = requests.post(self.url, params=params, data=data, headers={'Connection': 'close'}, timeout=self.timeout)
         r_dict = json.loads(r.text)
 
         return r_dict
