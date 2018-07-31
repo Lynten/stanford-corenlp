@@ -154,6 +154,7 @@ class StanfordCoreNLP(object):
 
         r = requests.post(self.url, params={'properties': str(properties)}, data=text,
                           headers={'Connection': 'close'}, timeout=self.timeout)
+        r.raise_for_status()
         return r.text
 
     def tregex(self, sentence, pattern):
@@ -238,6 +239,7 @@ class StanfordCoreNLP(object):
 
         logging.info(params)
         r = requests.post(url, params=params, data=data, headers={'Connection': 'close'}, timeout=self.timeout)
+        r.raise_for_status()
         r_dict = r.json()
 
         return r_dict
