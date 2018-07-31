@@ -2,7 +2,6 @@
 from __future__ import print_function
 
 import glob
-import json
 import logging
 import os
 import re
@@ -239,7 +238,7 @@ class StanfordCoreNLP(object):
 
         logging.info(params)
         r = requests.post(url, params=params, data=data, headers={'Connection': 'close'}, timeout=self.timeout)
-        r_dict = json.loads(r.text)
+        r_dict = r.json()
 
         return r_dict
 
