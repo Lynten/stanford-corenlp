@@ -12,13 +12,12 @@ import sys
 import time
 
 import psutil
+import requests
 
 try:
     from urlparse import urlparse
 except ImportError:
     from urllib.parse import urlparse
-
-import requests
 
 
 class StanfordCoreNLP(object):
@@ -252,4 +251,4 @@ class StanfordCoreNLP(object):
     def _check_language(self, lang):
         if lang not in ['en', 'zh', 'ar', 'fr', 'de', 'es']:
             raise ValueError('lang=' + lang + ' not supported. Use English(en), Chinese(zh), Arabic(ar), '
-                                                   'French(fr), German(de), Spanish(es).')
+                             'French(fr), German(de), Spanish(es).')
