@@ -154,7 +154,7 @@ class StanfordCoreNLP(object):
             text = text.encode('utf-8')
 
         r = requests.post(self.url, params={'properties': str(properties)}, data=text,
-                          headers={'Connection': 'close'})
+                          headers={'Connection': 'close'}, timeout=self.timeout)
         return r.text
 
     def tregex(self, sentence, pattern):
