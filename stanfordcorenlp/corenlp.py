@@ -21,7 +21,7 @@ except ImportError:
 
 
 class StanfordCoreNLP(object):
-    def __init__(self, path_or_host, port=None, memory='4g', lang='en', timeout=1500, quiet=True,
+    def __init__(self, path_or_host, port=None, memory='4g', lang='en', timeout=15, quiet=True,
                  logging_level=logging.WARNING, max_retries=5):
         self.path_or_host = path_or_host
         self.port = port
