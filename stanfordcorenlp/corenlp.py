@@ -86,7 +86,7 @@ class StanfordCoreNLP:
 
             # Start native server
             logging.info('Initializing native server...')
-            cmd = "java"
+            cmd = "java --add-modules java.se.ee"
             java_args = "-Xmx{}".format(self.memory)
             java_class = "edu.stanford.nlp.pipeline.StanfordCoreNLPServer"
             class_path = '"{}*"'.format(directory)
