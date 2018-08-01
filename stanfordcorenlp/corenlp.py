@@ -170,8 +170,8 @@ class StanfordCoreNLP:
         return r_dict
 
     def word_tokenize(self, sentence, span=False):
-        r_dict = self._request(self.url, 'ssplit,tokenize', sentence)
-        tokens = [token['word'] for s in r_dict['sentences'] for token in s['tokens']]
+        r_dict = self._request('ssplit,tokenize', sentence)
+        tokens = [token['originalText'] for s in r_dict['sentences'] for token in s['tokens']]
 
         # Whether return token span
         if span:
@@ -187,7 +187,7 @@ class StanfordCoreNLP:
         tags = []
         for s in r_dict['sentences']:
             for token in s['tokens']:
-                words.append(token['word'])
+                words.append(token['originalText'])
                 tags.append(token['pos'])
         return list(zip(words, tags))
 
@@ -197,7 +197,7 @@ class StanfordCoreNLP:
         ner_tags = []
         for s in r_dict['sentences']:
             for token in s['tokens']:
-                words.append(token['word'])
+                words.append(token['originalText'])
                 ner_tags.append(token['ner'])
         return list(zip(words, ner_tags))
 
@@ -209,6 +209,17 @@ class StanfordCoreNLP:
         r_dict = self._request(self.url, 'depparse', sentence)
         return [(dep['dep'], dep['governor'], dep['dependent']) for s in r_dict['sentences'] for dep in
                 s['basicDependencies']]
+
+    def coref(self, text):
+        r_dict = self._request('coref', text)
+
+        corefs = []
+        for k, mentions in r_dict['corefs'].items():
+            simplified_mentions = []
+            for m in mentions:
+                simplified_mentions.append((m['sentNum'], m['startIndex'], m['endIndex'], m['text']))
+            corefs.append(simplified_mentions)
+        return corefs
 
     def switch_language(self, language="en"):
         self._check_language(language)
