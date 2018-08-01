@@ -1,13 +1,21 @@
 ## stanfordcorenlp
 [![PyPI](https://img.shields.io/pypi/v/stanfordcorenlp.svg)]()
 [![GitHub release](https://img.shields.io/github/release/Lynten/stanford-corenlp.svg)]()
+[![PyPI - Python Version](https://img.shields.io/pypi/pyversions/stanfordcorenlp.svg)]()
+
 
 `stanfordcorenlp` is a Python wrapper for [Stanford CoreNLP](https://stanfordnlp.github.io/CoreNLP/). It provides a simple API for text processing tasks such as Tokenization, Part of Speech Tagging, Named Entity Reconigtion, Constituency Parsing, Dependency Parsing, and more.
 
 ## Prerequisites
 Java 1.8+ (Check with command: `java -version`) ([Download Page](http://www.oracle.com/technetwork/cn/java/javase/downloads/jdk8-downloads-2133151-zhs.html))
 
-Stanford CoreNLP 3.7.0 ([Download Page](https://stanfordnlp.github.io/CoreNLP/download.html))
+Stanford CoreNLP ([Download Page](https://stanfordnlp.github.io/CoreNLP/history.html))
+
+| Py Version | CoreNLP Version |
+| --- | --- |
+|v3.7.0.1 v3.7.0.2 | CoreNLP 3.7.0 |
+|v3.8.0.1 | CoreNLP 3.8.0 |
+|v3.9.1.1 | CoreNLP 3.9.1 |
 
 ## Installation
 
@@ -19,7 +27,7 @@ Stanford CoreNLP 3.7.0 ([Download Page](https://stanfordnlp.github.io/CoreNLP/do
 # Simple usage
 from stanfordcorenlp import StanfordCoreNLP
 
-nlp = StanfordCoreNLP(r'G:/JavaLibraries/stanford-corenlp-full-2016-10-31/')
+nlp = StanfordCoreNLP(r'G:\JavaLibraries\stanford-corenlp-full-2018-02-27')
 
 sentence = 'Guangdong University of Foreign Studies is located in Guangzhou.'
 print 'Tokenize:', nlp.word_tokenize(sentence)
@@ -27,6 +35,8 @@ print 'Part of Speech:', nlp.pos_tag(sentence)
 print 'Named Entities:', nlp.ner(sentence)
 print 'Constituency Parsing:', nlp.parse(sentence)
 print 'Dependency Parsing:', nlp.dependency_parse(sentence)
+
+nlp.close() # Do not forget to close! The backend server will consume a lot memery.
 ```
 
 Output format:
@@ -59,19 +69,19 @@ Output format:
 ```
 
 ### Other Human Languages Support
-Note: you must download an additional model file and place it in the `.../stanford-corenlp-full-2016-10-31/` folder. For example, you should [download](http://nlp.stanford.edu/software/stanford-chinese-corenlp-2016-10-31-models.jar) the `stanford-chinese-corenlp-2016-10-31-models.jar` file if you want to process Chinese.
+Note: you must download an additional model file and place it in the `.../stanford-corenlp-full-2018-02-27` folder. For example, you should download the `stanford-chinese-corenlp-2018-02-27-models.jar` file if you want to process Chinese.
 ```python
 # _*_coding:utf-8_*_
 
 # Other human languages support, e.g. Chinese
-nlp = StanfordCoreNLP(r'G:/JavaLibraries/stanford-corenlp-full-2016-10-31/', lang='zh')
-
 sentence = '清华大学位于北京。'
-print nlp.word_tokenize(sentence)
-print nlp.pos_tag(sentence)
-print nlp.ner(sentence)
-print nlp.parse(sentence)
-print nlp.dependency_parse(sentence)
+
+with StanfordCoreNLP(r'G:\JavaLibraries\stanford-corenlp-full-2018-02-27', lang='zh') as nlp:
+    print(nlp.word_tokenize(sentence))
+    print(nlp.pos_tag(sentence))
+    print(nlp.ner(sentence))
+    print(nlp.parse(sentence))
+    print(nlp.dependency_parse(sentence))
 ```
 
 ### General Stanford CoreNLP API
@@ -81,6 +91,7 @@ Since this will load all the models which require more memory, initialize the se
  # General json output
 nlp = StanfordCoreNLP(r'path_to_corenlp', memory='8g')
 print nlp.annotate(sentence)
+nlp.close()
 ```
 You can specify properties:
 
@@ -95,13 +106,19 @@ text = 'Guangdong University of Foreign Studies is located in Guangzhou. ' \
 
 props={'annotators': 'tokenize,ssplit,pos','pipelineLanguage':'en','outputFormat':'xml'}
 print nlp.annotate(text, properties=props)
+nlp.close()
 ```
 
 
 ### Use an Existing Server
+Start a [CoreNLP Server](https://stanfordnlp.github.io/CoreNLP/corenlp-server.html) with command:
+```
+java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 15000
+```
+And then:
 ```python
 # Use an existing server
-nlp = StanfordCoreNLP('http://corenlp.run', port=80)
+nlp = StanfordCoreNLP('http://localhost', port=9000)
 ```
 
 ## Debug
@@ -114,4 +131,14 @@ nlp = StanfordCoreNLP(r'path_or_host', logging_level=logging.DEBUG)
 
 # Check more info from the CoreNLP Server 
 nlp = StanfordCoreNLP(r'path_or_host', quiet=False, logging_level=logging.DEBUG)
+nlp.close()
 ```
+
+## Build
+
+We use `setuptools` to package our project. You can build from the latest source code with the following command:
+```
+$ python setup.py bdist_wheel --universal
+```
+
+You will see the `.whl` file under `dist` directory.

@@ -6,7 +6,6 @@ import json
 import logging
 import os
 import re
-import signal
 import socket
 import subprocess
 import sys
@@ -23,7 +22,7 @@ import requests
 
 
 class StanfordCoreNLP:
-    def __init__(self, path_or_host, port=9000, memory='4g', lang='en', timeout=1500, quiet=True,
+    def __init__(self, path_or_host, port=None, memory='4g', lang='en', timeout=1500, quiet=True,
                  logging_level=logging.WARNING):
         self.path_or_host = path_or_host
         self.port = port
@@ -51,6 +50,7 @@ class StanfordCoreNLP:
             if not os.path.isdir(self.path_or_host):
                 raise IOError(str(self.path_or_host) + ' is not a directory.')
             directory = os.path.normpath(self.path_or_host) + os.sep
+            self.class_path_dir = directory
 
             # Check if the language specific model file exists
             switcher = {
@@ -73,6 +73,13 @@ class StanfordCoreNLP:
                 raise IOError(jars.get(
                     self.lang) + ' not exists. You should download and place it in the ' + directory + ' first.')
 
+            # If port not set, auto select
+            if self.port is None:
+                for port_candidate in range(9000, 65535):
+                    if port_candidate not in [conn.laddr[1] for conn in psutil.net_connections()]:
+                        self.port = port_candidate
+                        break
+
             # Check if the port is in use
             if self.port in [conn.laddr[1] for conn in psutil.net_connections()]:
                 raise IOError('Port ' + str(self.port) + ' is already in use.')
@@ -82,9 +89,9 @@ class StanfordCoreNLP:
             cmd = "java"
             java_args = "-Xmx{}".format(self.memory)
             java_class = "edu.stanford.nlp.pipeline.StanfordCoreNLPServer"
-            path = '"{}*"'.format(directory)
+            class_path = '"{}*"'.format(directory)
 
-            args = [cmd, java_args, '-cp', path, java_class, '-port', str(self.port)]
+            args = [cmd, java_args, '-cp', class_path, java_class, '-port', str(self.port)]
 
             args = ' '.join(args)
 
@@ -104,13 +111,19 @@ class StanfordCoreNLP:
         # Wait until server starts
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         host_name = urlparse(self.url).hostname
-        time.sleep(1)
+        time.sleep(1)  # OSX, not tested
         while sock.connect_ex((host_name, self.port)):
             logging.info('Waiting until the server is available.')
             time.sleep(1)
         logging.info('The server is available.')
 
-    def __del__(self):
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
+    def close(self):
         logging.info('Cleanup...')
         if hasattr(self, 'p'):
             try:
@@ -118,13 +131,20 @@ class StanfordCoreNLP:
             except psutil.NoSuchProcess:
                 logging.info('No process: {}'.format(self.p.pid))
                 return
+
+            if self.class_path_dir not in ' '.join(parent.cmdline()):
+                logging.info('Process not in: {}'.format(parent.cmdline()))
+                return
+
             children = parent.children(recursive=True)
             for process in children:
-                logging.info('Killing pid: {} cmdline: {}'.format(process.pid, process.cmdline()))
-                process.send_signal(signal.SIGTERM)
+                logging.info('Killing pid: {}, cmdline: {}'.format(process.pid, process.cmdline()))
+                # process.send_signal(signal.SIGTERM)
+                process.kill()
 
-            logging.info('Killing shell pid: {}'.format(parent.pid))
-            parent.send_signal(signal.SIGTERM)
+            logging.info('Killing shell pid: {}, cmdline: {}'.format(parent.pid, parent.cmdline()))
+            # parent.send_signal(signal.SIGTERM)
+            parent.kill()
 
     def annotate(self, text, properties=None):
         if sys.version_info.major >= 3:
@@ -134,53 +154,98 @@ class StanfordCoreNLP:
                           headers={'Connection': 'close'})
         return r.text
 
-    def word_tokenize(self, sentence):
+    def tregex(self, sentence, pattern):
+        tregex_url = self.url + '/tregex'
+        r_dict = self._request(tregex_url, "tokenize,ssplit,depparse,parse", sentence, pattern=pattern)
+        return r_dict
+
+    def tokensregex(self, sentence, pattern):
+        tokensregex_url = self.url + '/tokensregex'
+        r_dict = self._request(tokensregex_url, "tokenize,ssplit,depparse", sentence, pattern=pattern)
+        return r_dict
+
+    def semgrex(self, sentence, pattern):
+        semgrex_url = self.url + '/semgrex'
+        r_dict = self._request(semgrex_url, "tokenize,ssplit,depparse", sentence, pattern=pattern)
+        return r_dict
+
+    def word_tokenize(self, sentence, span=False):
         r_dict = self._request('ssplit,tokenize', sentence)
-        return [token['word'] for s in r_dict['sentences'] for token in s['tokens']]
+        tokens = [token['originalText'] for s in r_dict['sentences'] for token in s['tokens']]
+
+        # Whether return token span
+        if span:
+            spans = [(token['characterOffsetBegin'], token['characterOffsetEnd']) for s in r_dict['sentences'] for token
+                     in s['tokens']]
+            return tokens, spans
+        else:
+            return tokens
 
     def pos_tag(self, sentence):
-        r_dict = self._request('pos', sentence)
+        r_dict = self._request(self.url, 'pos', sentence)
         words = []
         tags = []
         for s in r_dict['sentences']:
             for token in s['tokens']:
-                words.append(token['word'])
+                words.append(token['originalText'])
                 tags.append(token['pos'])
         return list(zip(words, tags))
 
     def ner(self, sentence):
-        r_dict = self._request('ner', sentence)
+        r_dict = self._request(self.url, 'ner', sentence)
         words = []
         ner_tags = []
         for s in r_dict['sentences']:
             for token in s['tokens']:
-                words.append(token['word'])
+                words.append(token['originalText'])
                 ner_tags.append(token['ner'])
         return list(zip(words, ner_tags))
 
     def parse(self, sentence):
-        r_dict = self._request('pos,parse', sentence)
+        r_dict = self._request(self.url, 'pos,parse', sentence)
         return [s['parse'] for s in r_dict['sentences']][0]
 
     def dependency_parse(self, sentence):
-        r_dict = self._request('depparse', sentence)
+        r_dict = self._request(self.url, 'depparse', sentence)
         return [(dep['dep'], dep['governor'], dep['dependent']) for s in r_dict['sentences'] for dep in
                 s['basicDependencies']]
 
-    def _request(self, annotators=None, data=None):
+    def coref(self, text):
+        r_dict = self._request('coref', text)
+
+        corefs = []
+        for k, mentions in r_dict['corefs'].items():
+            simplified_mentions = []
+            for m in mentions:
+                simplified_mentions.append((m['sentNum'], m['startIndex'], m['endIndex'], m['text']))
+            corefs.append(simplified_mentions)
+        return corefs
+
+    def switch_language(self, language="en"):
+        self._check_language(language)
+        self.lang = language
+
+    def _request(self, url, annotators=None, data=None, *args, **kwargs):
         if sys.version_info.major >= 3:
             data = data.encode('utf-8')
 
-        properties = {'annotators': annotators, 'pipelineLanguage': self.lang, 'outputFormat': 'json'}
-        r = requests.post(self.url, params={'properties': str(properties)}, data=data,
-                          headers={'Connection': 'close'})
+        properties = {'annotators': annotators, 'outputFormat': 'json'}
+        params = {'properties': str(properties), 'pipelineLanguage': self.lang}
+        if 'pattern' in kwargs:
+            params = {"pattern": kwargs['pattern'], 'properties': str(properties), 'pipelineLanguage': self.lang}
+
+        logging.info(params)
+        r = requests.post(url, params=params, data=data, headers={'Connection': 'close'})
         r_dict = json.loads(r.text)
 
         return r_dict
 
     def _check_args(self):
-        if self.lang not in ['en', 'zh', 'ar', 'fr', 'de', 'es']:
-            raise ValueError(
-                'lang=' + self.lang + ' not supported. Use English(en), Chinese(zh), Arabic(ar), French(fr), German(de), Spanish(es).')
+        self._check_language(self.lang)
         if not re.match('\dg', self.memory):
             raise ValueError('memory=' + self.memory + ' not supported. Use 4g, 6g, 8g and etc. ')
+
+    def _check_language(self, lang):
+        if lang not in ['en', 'zh', 'ar', 'fr', 'de', 'es']:
+            raise ValueError('lang=' + self.lang + ' not supported. Use English(en), Chinese(zh), Arabic(ar), '
+                                                   'French(fr), German(de), Spanish(es).')
