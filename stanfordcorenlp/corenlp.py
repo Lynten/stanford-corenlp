@@ -2,7 +2,6 @@
 from __future__ import print_function
 
 import glob
-import json
 import logging
 import os
 import re
@@ -12,17 +11,16 @@ import sys
 import time
 
 import psutil
+import requests
 
 try:
     from urlparse import urlparse
 except ImportError:
     from urllib.parse import urlparse
 
-import requests
 
-
-class StanfordCoreNLP:
-    def __init__(self, path_or_host, port=None, memory='4g', lang='en', timeout=1500, quiet=True,
+class StanfordCoreNLP(object):
+    def __init__(self, path_or_host, port=None, memory='4g', lang='en', timeout=15, quiet=True,
                  logging_level=logging.WARNING, max_retries=5):
         self.path_or_host = path_or_host
         self.port = port
@@ -155,7 +153,8 @@ class StanfordCoreNLP:
             text = text.encode('utf-8')
 
         r = requests.post(self.url, params={'properties': str(properties)}, data=text,
-                          headers={'Connection': 'close'})
+                          headers={'Connection': 'close'}, timeout=self.timeout)
+        r.raise_for_status()
         return r.text
 
     def tregex(self, sentence, pattern):
@@ -239,8 +238,9 @@ class StanfordCoreNLP:
             params = {"pattern": kwargs['pattern'], 'properties': str(properties), 'pipelineLanguage': self.lang}
 
         logging.info(params)
-        r = requests.post(url, params=params, data=data, headers={'Connection': 'close'})
-        r_dict = json.loads(r.text)
+        r = requests.post(url, params=params, data=data, headers={'Connection': 'close'}, timeout=self.timeout)
+        r.raise_for_status()
+        r_dict = r.json()
 
         return r_dict
 
@@ -251,5 +251,5 @@ class StanfordCoreNLP:
 
     def _check_language(self, lang):
         if lang not in ['en', 'zh', 'ar', 'fr', 'de', 'es']:
-            raise ValueError('lang=' + self.lang + ' not supported. Use English(en), Chinese(zh), Arabic(ar), '
-                                                   'French(fr), German(de), Spanish(es).')
+            raise ValueError('lang=' + lang + ' not supported. Use English(en), Chinese(zh), Arabic(ar), '
+                             'French(fr), German(de), Spanish(es).')
