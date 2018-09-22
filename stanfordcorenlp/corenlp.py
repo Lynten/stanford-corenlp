@@ -23,7 +23,7 @@ import requests
 
 class StanfordCoreNLP:
     def __init__(self, path_or_host, port=None, memory='4g', lang='en', timeout=1500, quiet=True,
-                 logging_level=logging.WARNING):
+                 logging_level=logging.WARNING, max_retries=5):
         self.path_or_host = path_or_host
         self.port = port
         self.memory = memory
@@ -112,8 +112,12 @@ class StanfordCoreNLP:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         host_name = urlparse(self.url).hostname
         time.sleep(1)  # OSX, not tested
+        trial = 1
         while sock.connect_ex((host_name, self.port)):
+            if trial > max_retries:
+                raise ValueError('Corenlp server is not available')
             logging.info('Waiting until the server is available.')
+            trial += 1
             time.sleep(1)
         logging.info('The server is available.')
 
@@ -156,17 +160,17 @@ class StanfordCoreNLP:
 
     def tregex(self, sentence, pattern):
         tregex_url = self.url + '/tregex'
-        r_dict = self._request(tregex_url, pattern, "tokenize,ssplit,depparse,parse", sentence)
+        r_dict = self._request(tregex_url, "tokenize,ssplit,depparse,parse", sentence, pattern=pattern)
         return r_dict
 
     def tokensregex(self, sentence, pattern):
         tokensregex_url = self.url + '/tokensregex'
-        r_dict = self._request(tokensregex_url, pattern, "tokenize,ssplit,depparse", sentence)
+        r_dict = self._request(tokensregex_url, "tokenize,ssplit,depparse", sentence, pattern=pattern)
         return r_dict
 
     def semgrex(self, sentence, pattern):
         semgrex_url = self.url + '/semgrex'
-        r_dict = self._request(semgrex_url, pattern, "tokenize,ssplit,depparse", sentence)
+        r_dict = self._request(semgrex_url, "tokenize,ssplit,depparse", sentence, pattern=pattern)
         return r_dict
 
     def word_tokenize(self, sentence, span=False):
@@ -182,7 +186,7 @@ class StanfordCoreNLP:
             return tokens
 
     def pos_tag(self, sentence):
-        r_dict = self._request('pos', sentence)
+        r_dict = self._request(self.url, 'pos', sentence)
         words = []
         tags = []
         for s in r_dict['sentences']:
@@ -192,7 +196,7 @@ class StanfordCoreNLP:
         return list(zip(words, tags))
 
     def ner(self, sentence):
-        r_dict = self._request('ner', sentence)
+        r_dict = self._request(self.url, 'ner', sentence)
         words = []
         ner_tags = []
         for s in r_dict['sentences']:
@@ -202,11 +206,11 @@ class StanfordCoreNLP:
         return list(zip(words, ner_tags))
 
     def parse(self, sentence):
-        r_dict = self._request('pos,parse', sentence)
+        r_dict = self._request(self.url, 'pos,parse', sentence)
         return [s['parse'] for s in r_dict['sentences']][0]
 
     def dependency_parse(self, sentence):
-        r_dict = self._request('depparse', sentence)
+        r_dict = self._request(self.url, 'depparse', sentence)
         return [(dep['dep'], dep['governor'], dep['dependent']) for s in r_dict['sentences'] for dep in
                 s['basicDependencies']]
 
@@ -225,7 +229,7 @@ class StanfordCoreNLP:
         self._check_language(language)
         self.lang = language
 
-    def _request(self, annotators=None, data=None, *args, **kwargs):
+    def _request(self, url, annotators=None, data=None, *args, **kwargs):
         if sys.version_info.major >= 3:
             data = data.encode('utf-8')
 
@@ -235,7 +239,8 @@ class StanfordCoreNLP:
             params = {"pattern": kwargs['pattern'], 'properties': str(properties), 'pipelineLanguage': self.lang}
 
         logging.info(params)
-        r = requests.post(self.url, params=params, data=data, headers={'Connection': 'close'}, timeout=self.timeout)
+        r = requests.post(url, params=params, data=data, headers={'Connection': 'close'}, timeout=self.timeout)
+
         r_dict = json.loads(r.text)
 
         return r_dict
