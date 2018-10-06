@@ -215,7 +215,7 @@ class StanfordCoreNLP:
                 s['basicDependencies']]
 
     def coref(self, text):
-        r_dict = self._request('coref', text)
+        r_dict = self._request(self.url, 'coref', text)
 
         corefs = []
         for k, mentions in r_dict['corefs'].items():
