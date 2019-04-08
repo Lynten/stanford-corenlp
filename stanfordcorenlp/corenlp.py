@@ -4,7 +4,7 @@ from __future__ import print_function
 import glob
 import json
 import zipfile
-import StringIO
+import io
 import logging
 import os
 import re
@@ -43,7 +43,7 @@ class StanfordCoreNLP:
             self.path_or_host = os.path.basename(path_or_host[:-4])
             if not os.path.isfile(self.path_or_host):
                 req = requests.get(path_or_host, stream=True)
-                zip_ref = zipfile.ZipFile(StringIO.StringIO(req.content))
+                zip_ref = zipfile.ZipFile(io.BytesIO(req.content))
                 zip_ref.extractall(self.path_or_host)
 
         if self.path_or_host.startswith('http'):
