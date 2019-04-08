@@ -3,6 +3,8 @@ from __future__ import print_function
 
 import glob
 import json
+import zipfile
+import StringIO
 import logging
 import os
 import re
@@ -37,14 +39,26 @@ class StanfordCoreNLP:
         # Check args
         self._check_args()
 
-        if path_or_host.startswith('http'):
-            self.url = path_or_host + ':' + str(port)
+        if path_or_host.startswith('http') and path_or_host.endswith('.zip'):
+            req = requests.get(path_or_host, stream=True)
+            zip_ref = zipfile.ZipFile(StringIO.StringIO(req.content))
+            self.path_or_host = os.path.basename(path_or_host[:-4)
+            zip_ref.extractall(self.path_or_host)
+
+        if self.path_or_host.startswith('http'):
+            self.url = self.path_or_host + ':' + str(port)
             logging.info('Using an existing server {}'.format(self.url))
         else:
 
             # Check Java
             if not subprocess.call(['java', '-version'], stdout=subprocess.PIPE, stderr=subprocess.STDOUT) == 0:
                 raise RuntimeError('Java not found.')
+
+            # Check if zip file
+            if self.path_or_host.endswith('.zip') and os.path.isfile(self.path_or_host):
+                zip_ref = zipfile.ZipFile(self.path_or_host, 'r')
+                self.path_or_host = self.path_or_host[:-4]
+                zip_ref.extractall(self.path_or_host)
 
             # Check if the dir exists
             if not os.path.isdir(self.path_or_host):
