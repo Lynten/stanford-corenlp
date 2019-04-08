@@ -40,10 +40,11 @@ class StanfordCoreNLP:
         self._check_args()
 
         if path_or_host.startswith('http') and path_or_host.endswith('.zip'):
-            req = requests.get(path_or_host, stream=True)
-            zip_ref = zipfile.ZipFile(StringIO.StringIO(req.content))
-            self.path_or_host = os.path.basename(path_or_host[:-4)
-            zip_ref.extractall(self.path_or_host)
+            self.path_or_host = os.path.basename(path_or_host[:-4])
+            if not os.path.isfile(self.path_or_host):
+                req = requests.get(path_or_host, stream=True)
+                zip_ref = zipfile.ZipFile(StringIO.StringIO(req.content))
+                zip_ref.extractall(self.path_or_host)
 
         if self.path_or_host.startswith('http'):
             self.url = self.path_or_host + ':' + str(port)
