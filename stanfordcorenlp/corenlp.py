@@ -91,7 +91,7 @@ class StanfordCoreNLP:
             java_class = "edu.stanford.nlp.pipeline.StanfordCoreNLPServer"
             class_path = '"{}*"'.format(directory)
 
-            args = [cmd, java_args, '-cp', class_path, java_class, '-port', str(self.port)]
+            args = [cmd, java_args, '-cp', class_path, java_class, '-port', str(self.port), 'timeout', str(self.timeout)]
 
             args = ' '.join(args)
 
