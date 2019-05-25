@@ -22,7 +22,7 @@ import requests
 
 
 class StanfordCoreNLP:
-    def __init__(self, path_or_host, port=None, memory='4g', lang='en', timeout=1500, quiet=True,
+    def __init__(self, path_or_host, port=80, memory='4g', lang='en', timeout=1500, quiet=True,
                  logging_level=logging.WARNING, max_retries=5):
         self.path_or_host = path_or_host
         self.port = port
@@ -38,7 +38,8 @@ class StanfordCoreNLP:
         self._check_args()
 
         if path_or_host.startswith('http'):
-            self.url = path_or_host + ':' + str(port)
+            parsed_url = urlparse(path_or_host)
+            self.url = "{}://{}:{}{}".format(parsed_url.scheme, parsed_url.netloc, port, parsed_url.path)
             logging.info('Using an existing server {}'.format(self.url))
         else:
 
@@ -174,7 +175,7 @@ class StanfordCoreNLP:
         return r_dict
 
     def word_tokenize(self, sentence, span=False):
-        r_dict = self._request('ssplit,tokenize', sentence)
+        r_dict = self._request(self.url, 'ssplit,tokenize', sentence)
         tokens = [token['originalText'] for s in r_dict['sentences'] for token in s['tokens']]
 
         # Whether return token span
@@ -215,7 +216,7 @@ class StanfordCoreNLP:
                 s['basicDependencies']]
 
     def coref(self, text):
-        r_dict = self._request('coref', text)
+        r_dict = self._request(self.url, 'coref', text)
 
         corefs = []
         for k, mentions in r_dict['corefs'].items():
