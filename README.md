@@ -29,12 +29,13 @@ from stanfordcorenlp import StanfordCoreNLP
 
 nlp = StanfordCoreNLP(r'G:\JavaLibraries\stanford-corenlp-full-2018-02-27')
 
-sentence = 'Guangdong University of Foreign Studies is located in Guangzhou.'
-print 'Tokenize:', nlp.word_tokenize(sentence)
-print 'Part of Speech:', nlp.pos_tag(sentence)
-print 'Named Entities:', nlp.ner(sentence)
-print 'Constituency Parsing:', nlp.parse(sentence)
-print 'Dependency Parsing:', nlp.dependency_parse(sentence)
+sentence = 'Guangdong University of Foreign Studies is located in Guangzhou. It is a beautiful university.'
+print('Tokenize:', nlp.word_tokenize(sentence))
+print('Part of Speech:', nlp.pos_tag(sentence))
+print('Named Entities:', nlp.ner(sentence))
+print('Constituency Parsing:', nlp.parse(sentence))
+print('Dependency Parsing:', nlp.dependency_parse(sentence))
+print('Coreferce Resolution:', nlp.coref(sentence))
 
 nlp.close() # Do not forget to close! The backend server will consume a lot memery.
 ```
@@ -66,6 +67,9 @@ Output format:
 # Dependency Parsing
 [(u'ROOT', 0, 7), (u'compound', 2, 1), (u'nsubjpass', 7, 2), (u'case', 5, 3), (u'compound', 5, 4), (u'nmod', 2, 5), (u'auxpass', 7, 6), (u'case', 9, 8), (u'nmod', 7, 9), (u'punct', 7, 10)]
 
+# Coreference Resolution
+[[(1, 1, 6, 'Guangdong University of Foreign Studies'), (2, 1, 2, 'It')]]
+
 ```
 
 ### Other Human Languages Support
@@ -74,7 +78,7 @@ Note: you must download an additional model file and place it in the `.../stanfo
 # _*_coding:utf-8_*_
 
 # Other human languages support, e.g. Chinese
-sentence = '清华大学位于北京。'
+sentence = '清华大学位于北京。它是一所综合性大学。'
 
 with StanfordCoreNLP(r'G:\JavaLibraries\stanford-corenlp-full-2018-02-27', lang='zh') as nlp:
     print(nlp.word_tokenize(sentence))
@@ -82,6 +86,7 @@ with StanfordCoreNLP(r'G:\JavaLibraries\stanford-corenlp-full-2018-02-27', lang=
     print(nlp.ner(sentence))
     print(nlp.parse(sentence))
     print(nlp.dependency_parse(sentence))
+    print(nlp.coref(sentence))
 ```
 
 ### General Stanford CoreNLP API
@@ -90,7 +95,7 @@ Since this will load all the models which require more memory, initialize the se
 ```python
  # General json output
 nlp = StanfordCoreNLP(r'path_to_corenlp', memory='8g')
-print nlp.annotate(sentence)
+print(nlp.annotate(sentence))
 nlp.close()
 ```
 You can specify properties:
@@ -105,7 +110,7 @@ text = 'Guangdong University of Foreign Studies is located in Guangzhou. ' \
        'GDUFS is active in a full range of international cooperation and exchanges in education. '
 
 props={'annotators': 'tokenize,ssplit,pos','pipelineLanguage':'en','outputFormat':'xml'}
-print nlp.annotate(text, properties=props)
+print(nlp.annotate(text, properties=props))
 nlp.close()
 ```
 
@@ -142,3 +147,30 @@ $ python setup.py bdist_wheel --universal
 ```
 
 You will see the `.whl` file under `dist` directory.
+
+## Common Error
+```python
+Traceback (most recent call last):
+  File "/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/psutil/_psosx.py", line 339, in wrapper
+    return fun(self, *args, **kwargs)
+  File "/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/psutil/_psosx.py", line 528, in connections
+    rawlist = cext.proc_connections(self.pid, families, types)
+PermissionError: [Errno 1] Operation not permitted
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/USERNAME/Stanford-OpenIE-Python/stanford-corenlp/simple_usage.py", line 4, in <module>
+    nlp = StanfordCoreNLP(r'../stanford-corenlp-full-2018-10-05')
+  File "/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/stanfordcorenlp/corenlp.py", line 79, in __init__
+    if port_candidate not in [conn.laddr[1] for conn in psutil.net_connections()]:
+  File "/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/psutil/__init__.py", line 2263, in net_connections
+    return _psplatform.net_connections(kind)
+  File "/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/psutil/_psosx.py", line 252, in net_connections
+    cons = Process(pid).connections(kind)
+  File "/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/psutil/_psosx.py", line 344, in wrapper
+    raise AccessDenied(self.pid, self._name)
+psutil.AccessDenied: psutil.AccessDenied (pid=2059)
+```
+
+The solution to the error is to run the file as Root User and run with Terminal on MacOS or other command line tools in other OS.

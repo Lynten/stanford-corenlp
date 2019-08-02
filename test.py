@@ -20,6 +20,7 @@ print('Part of Speech:', nlp.pos_tag(sentence))
 print('Named Entities:', nlp.ner(sentence))
 print('Constituency Parsing:', nlp.parse(sentence))
 print('Dependency Parsing:', nlp.dependency_parse(sentence))
+print('Coreference Resolution:', nlp.coref(sentence))
 
 nlp.close()
 
@@ -32,6 +33,7 @@ with StanfordCoreNLP(local_corenlp_path, lang='zh', quiet=False) as nlp:
     print(nlp.ner(sentence))
     print(nlp.parse(sentence))
     print(nlp.dependency_parse(sentence))
+    print(nlp.coref(sentence))
 
 # General Stanford CoreNLP API
 nlp = StanfordCoreNLP(local_corenlp_path, memory='8g', lang='zh')
