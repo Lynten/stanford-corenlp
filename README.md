@@ -160,7 +160,7 @@ PermissionError: [Errno 1] Operation not permitted
 During handling of the above exception, another exception occurred:
 
 Traceback (most recent call last):
-  File "/Users/yantong/Stanford-OpenIE-Python/stanford-corenlp/simple_usage.py", line 4, in <module>
+  File "/Users/USERNAME/Stanford-OpenIE-Python/stanford-corenlp/simple_usage.py", line 4, in <module>
     nlp = StanfordCoreNLP(r'../stanford-corenlp-full-2018-10-05')
   File "/Library/Frameworks/Python.framework/Versions/3.7/lib/python3.7/site-packages/stanfordcorenlp/corenlp.py", line 79, in __init__
     if port_candidate not in [conn.laddr[1] for conn in psutil.net_connections()]:
