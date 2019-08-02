@@ -173,4 +173,4 @@ Traceback (most recent call last):
 psutil.AccessDenied: psutil.AccessDenied (pid=2059)
 ```
 
-The solution to the error is run the file as Root User and run with Terminal on MacOS or other command line tools in other OS.
+The solution to the error is to run the file as Root User and run with Terminal on MacOS or other command line tools in other OS.
