@@ -23,7 +23,7 @@ import requests
 
 class StanfordCoreNLP:
     def __init__(self, path_or_host, port=None, memory='4g', lang='en', timeout=1500, quiet=True,
-                 logging_level=logging.WARNING, max_retries=5):
+                 logging_level=logging.WARNING, max_retries=5, username=None, password=None):
         self.path_or_host = path_or_host
         self.port = port
         self.memory = memory
@@ -31,6 +31,8 @@ class StanfordCoreNLP:
         self.timeout = timeout
         self.quiet = quiet
         self.logging_level = logging_level
+        self.username = username
+        self.password = password
 
         logging.basicConfig(level=self.logging_level)
 
@@ -155,7 +157,7 @@ class StanfordCoreNLP:
             text = text.encode('utf-8')
 
         r = requests.post(self.url, params={'properties': str(properties)}, data=text,
-                          headers={'Connection': 'close'})
+                          headers={'Connection': 'close'}, auth=(self.username, self.password))
         return r.text
 
     def tregex(self, sentence, pattern):
@@ -239,7 +241,8 @@ class StanfordCoreNLP:
             params = {"pattern": kwargs['pattern'], 'properties': str(properties), 'pipelineLanguage': self.lang}
 
         logging.info(params)
-        r = requests.post(url, params=params, data=data, headers={'Connection': 'close'})
+        r = requests.post(url, params=params, data=data, headers={'Connection': 'close'},
+                          auth=(self.username, self.password))
         r_dict = json.loads(r.text)
 
         return r_dict
