@@ -57,9 +57,10 @@ class StanfordCoreNLP:
 
             # Check if zip file
             if self.path_or_host.endswith('.zip') and os.path.isfile(self.path_or_host):
-                zip_ref = zipfile.ZipFile(self.path_or_host, 'r')
                 self.path_or_host = self.path_or_host[:-4]
-                zip_ref.extractall(self.path_or_host)
+                if not os.path.isfile(self.path_or_host):
+                    zip_ref = zipfile.ZipFile(self.path_or_host + '.zip', 'r')
+                    zip_ref.extractall()
 
             # Check if the dir exists
             if not os.path.isdir(self.path_or_host):
@@ -188,15 +189,24 @@ class StanfordCoreNLP:
         r_dict = self._request(semgrex_url, "tokenize,ssplit,depparse", sentence, pattern=pattern)
         return r_dict
 
-    def word_tokenize(self, sentence, span=False):
-        r_dict = self._request('ssplit,tokenize', sentence)
-        tokens = [token['originalText'] for s in r_dict['sentences'] for token in s['tokens']]
+    def word_tokenize(self, sentence, words=False, span=False):
+        r_dict = self._request(self.url, 'ssplit,tokenize', sentence)
+        tokens = ([token['index'] for s in r_dict['sentences'] for token in s['tokens']],)
 
         # Whether return token span
         if span:
             spans = [(token['characterOffsetBegin'], token['characterOffsetEnd']) for s in r_dict['sentences'] for token
                      in s['tokens']]
-            return tokens, spans
+            tokens = (*tokens, spans)
+
+        # Whether return token words
+        if words:
+            word_tokens = [(token['originalText']) for s in r_dict['sentences'] for token
+                     in s['tokens']]
+            tokens = (*tokens, word_tokens)
+
+        if len(tokens) == 1:
+            return tokens[0]
         else:
             return tokens
 
@@ -222,7 +232,7 @@ class StanfordCoreNLP:
 
     def parse(self, sentence):
         r_dict = self._request(self.url, 'pos,parse', sentence)
-        return [s['parse'] for s in r_dict['sentences']][0]
+        return [s['parse'] for s in r_dict['sentences']]
 
     def dependency_parse(self, sentence):
         r_dict = self._request(self.url, 'depparse', sentence)
@@ -255,13 +265,16 @@ class StanfordCoreNLP:
 
         logging.info(params)
         r = requests.post(url, params=params, data=data, headers={'Connection': 'close'})
-        r_dict = json.loads(r.text)
+        try:
+            r_dict = json.loads(r.text)
+        except:
+            logging.error(r.text)
 
         return r_dict
 
     def _check_args(self):
         self._check_language(self.lang)
-        if not re.match('\dg', self.memory):
+        if not re.match('\d+g', self.memory):
             raise ValueError('memory=' + self.memory + ' not supported. Use 4g, 6g, 8g and etc. ')
 
     def _check_language(self, lang):
