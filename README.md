@@ -97,7 +97,7 @@ You can specify properties:
 
 - `annotators`: `tokenize, ssplit, pos, lemma, ner, parse, depparse, dcoref` ([See Detail](https://stanfordnlp.github.io/CoreNLP/annotators.html))
 
-- `pipelineLanguage`: `en, zh, ar, fr, de, es` (English, Chinese, Arabic, French, German, Spanish) ([See Annotator Support Detail](https://stanfordnlp.github.io/CoreNLP/human-languages.html)) 
+- `pipelineLanguage`: `en, zh, ar, fr, de, es` (English, Chinese, Arabic, French, German, Spanish) ([See Annotator Support Detail](https://stanfordnlp.github.io/CoreNLP/human-languages.html))
 
 - `outputFormat`: `json, xml, text`
 ```python
@@ -113,7 +113,7 @@ nlp.close()
 ### Use an Existing Server
 Start a [CoreNLP Server](https://stanfordnlp.github.io/CoreNLP/corenlp-server.html) with command:
 ```
-java -mx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 15000
+java -Xmx4g -cp "*" edu.stanford.nlp.pipeline.StanfordCoreNLPServer -port 9000 -timeout 15000
 ```
 And then:
 ```python
@@ -129,7 +129,7 @@ from stanfordcorenlp import StanfordCoreNLP
 # Debug the wrapper
 nlp = StanfordCoreNLP(r'path_or_host', logging_level=logging.DEBUG)
 
-# Check more info from the CoreNLP Server 
+# Check more info from the CoreNLP Server
 nlp = StanfordCoreNLP(r'path_or_host', quiet=False, logging_level=logging.DEBUG)
 nlp.close()
 ```
