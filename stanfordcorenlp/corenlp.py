@@ -1,4 +1,4 @@
-# _*_coding:utf-8_*_
+l# _*_coding:utf-8_*_
 from __future__ import print_function
 
 import glob
@@ -72,8 +72,6 @@ class StanfordCoreNLP:
             if len(glob.glob(directory + switcher.get(self.lang))) <= 0:
                 raise IOError(jars.get(
                     self.lang) + ' not exists. You should download and place it in the ' + directory + ' first.')
-
-            self.port = 9999
 
             # Start native server
             logging.info('Initializing native server...')
