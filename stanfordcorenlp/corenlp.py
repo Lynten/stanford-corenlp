@@ -73,8 +73,6 @@ class StanfordCoreNLP:
                 raise IOError(jars.get(
                     self.lang) + ' not exists. You should download and place it in the ' + directory + ' first.')
 
-            self.port = 9999
-
             # Start native server
             logging.info('Initializing native server...')
             cmd = "java"
