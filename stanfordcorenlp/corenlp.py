@@ -1,4 +1,4 @@
-l# _*_coding:utf-8_*_
+# _*_coding:utf-8_*_
 from __future__ import print_function
 
 import glob
