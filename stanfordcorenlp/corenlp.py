@@ -73,17 +73,6 @@ class StanfordCoreNLP:
                 raise IOError(jars.get(
                     self.lang) + ' not exists. You should download and place it in the ' + directory + ' first.')
 
-            # If port not set, auto select
-            if self.port is None:
-                for port_candidate in range(9000, 65535):
-                    if port_candidate not in [conn.laddr[1] for conn in psutil.net_connections()]:
-                        self.port = port_candidate
-                        break
-
-            # Check if the port is in use
-            if self.port in [conn.laddr[1] for conn in psutil.net_connections()]:
-                raise IOError('Port ' + str(self.port) + ' is already in use.')
-
             # Start native server
             logging.info('Initializing native server...')
             cmd = "java"
@@ -174,7 +163,7 @@ class StanfordCoreNLP:
         return r_dict
 
     def word_tokenize(self, sentence, span=False):
-        r_dict = self._request('ssplit,tokenize', sentence)
+        r_dict = self._request(self.url, 'ssplit,tokenize', sentence)
         tokens = [token['originalText'] for s in r_dict['sentences'] for token in s['tokens']]
 
         # Whether return token span
