@@ -162,14 +162,20 @@ class StanfordCoreNLP:
         r_dict = self._request(semgrex_url, "tokenize,ssplit,depparse", sentence, pattern=pattern)
         return r_dict
 
-    def word_tokenize(self, sentence, span=False):
+    def word_tokenize(self, sentence, span=False, span_and_sentence_id=False):
         r_dict = self._request(self.url, 'ssplit,tokenize', sentence)
         tokens = [token['originalText'] for s in r_dict['sentences'] for token in s['tokens']]
 
         # Whether return token span
-        if span:
-            spans = [(token['characterOffsetBegin'], token['characterOffsetEnd']) for s in r_dict['sentences'] for token
+        spans = None
+        if span or span_and_sentence_id:
+            spans = [(token['characterOffsetBegin'], token['characterOffsetEnd']) for s in
+                     r_dict['sentences'] for token
                      in s['tokens']]
+        if span_and_sentence_id:
+            sentence_ids = [i for i, s in enumerate(r_dict['sentences']) for token in s['tokens']]
+            return tokens, spans, sentence_ids
+        elif span:
             return tokens, spans
         else:
             return tokens
