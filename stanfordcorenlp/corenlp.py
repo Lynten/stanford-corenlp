@@ -174,7 +174,7 @@ class StanfordCoreNLP:
         return r_dict
 
     def word_tokenize(self, sentence, span=False):
-        r_dict = self._request('ssplit,tokenize', sentence)
+        r_dict = self._request(self.url, 'ssplit,tokenize', sentence)
         tokens = [token['originalText'] for s in r_dict['sentences'] for token in s['tokens']]
 
         # Whether return token span
@@ -215,7 +215,7 @@ class StanfordCoreNLP:
                 s['basicDependencies']]
 
     def coref(self, text):
-        r_dict = self._request('coref', text)
+        r_dict = self._request(self.url, 'coref', text)
 
         corefs = []
         for k, mentions in r_dict['corefs'].items():
